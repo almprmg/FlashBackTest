@@ -11,10 +11,11 @@ class Bacl_Test_smunll:
         self.order = None
         self._postin = False
         self.Date_ende_order = None
+    
     def Trade(self):
         high =  self.data_low.loc[self.data_low.High >= self.tp].index[0]
         Low =  self.data_low.loc[self.data_low.Low <= self.sl].index[0]
-        if high.empty and Low.empty:
+        if high != None and Low != None:
             self.Date_ende_order = self.data_low.index[-1] + pd.Timestamp(day=1,unit='ms')
         check = high < Low
         if check :
