@@ -8,21 +8,26 @@ class Stratigy(Bacl_Test_smunll):
 
     
     order_ = []
-    def __init__(self,data_low,Date) -> None:
+
+    def __init__(self,data_low) -> None:
+        self.Date = type[pd.Timestamp]
+        self.Data : type[pd.DataFrame]
+        self.data_low = self.data_low.loc[data_low.index >= pd.Timestamp(self.Date)]
         
-        self.data_low = self.data_low.loc[data_low.index >= pd.Timestamp(Date)]
-        self.Date = Date
-        self.Date_ende_order = None
+       
+      
 
         
         
         
-    def buy(self, limet:float,tp: float,sl:float):
+    def buy(self, limet:float,tp: float,sl:float)-> None:
         if not self._postin:
             self.sl = sl
             self.tp =tp
             self.order = [self.Date,limet,tp,sl]
             self._postin = True
+            
+
             
     def sell(self, limet:float,tp: float,sl:float):
         if not self._postin:
@@ -30,6 +35,11 @@ class Stratigy(Bacl_Test_smunll):
             self.tp =tp
             self.order = [self.Date,limet,tp,sl]
             self._postin = True
-          
+
+    def update(self)-> None:
+        self.Trade()
+        self.Data = self.Data.loc[self.Data.index >=  self.Date_ende_order ].index[0]
+        self.Date = self.data.loc[self.data.Signal == 1 ].index[0]
+
     def next(self)-> None:...
     def init(self)-> None:...
