@@ -10,6 +10,11 @@ class BackTest:
         self.data = None
         self.data_smull = data_smull  
         self.Strutigy = Strutigy
+        if not isinstance(data,pd.DataFrame):
+            raise
+        if not isinstance(data.index,pd.Timestamp()):
+            raise
+         
 
     def run(self):
         self.Strutigy.inint
