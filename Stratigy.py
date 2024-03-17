@@ -26,6 +26,7 @@ class Stratigy(Bacl_Test_smunll):
             self.tp =tp
             self.order = [self.Date,limet,tp,sl]
             self._postin = True
+            self.update(self)
             
 
             
@@ -38,8 +39,8 @@ class Stratigy(Bacl_Test_smunll):
 
     def update(self)-> None:
         self.Trade()
-        self.Data = self.Data.loc[self.Data.index >=  self.Date_ende_order ].index[0]
-        self.Date = self.data.loc[self.data.Signal == 1 ].index[0]
-
+        self.Data = self.Data.loc[self.Data.index >=  self.Date_ende_order]
+        self.Date = self.Data.loc[self.Data.Signal != 0].index[0]
+    
     def next(self)-> None:...
     def init(self)-> None:...
