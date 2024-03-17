@@ -5,26 +5,31 @@ from BackTest.BackTest_Smull import Bacl_Test_smunll
 
 
 class Stratigy(Bacl_Test_smunll):
-    order = None
+
     
-    order_ ={"DateStart" : [],"Enter" : [] ,"Tp" : [],"Sl" : [] ,"Targit" : [],"DateEnd" : []}
+    order_ = []
     def __init__(self,data_low,Date) -> None:
+        
         self.data_low = self.data_low.loc[data_low.index >= pd.Timestamp(Date)]
         self.Date = Date
-        self._postin = False
         self.Date_ende_order = None
+
         
-        super()
         
         
-    def buy(self, limet,tp: float,sl:float):
+    def buy(self, limet:float,tp: float,sl:float):
         if not self._postin:
+            self.sl = sl
+            self.tp =tp
             self.order = [self.Date,limet,tp,sl]
+            self._postin = True
             
     def sell(self, limet:float,tp: float,sl:float):
         if not self._postin:
+            self.sl = sl
+            self.tp =tp
             self.order = [self.Date,limet,tp,sl]
-               
-    def Check_Order(self):
-        self.Date_ende_order = super().next()
-
+            self._postin = True
+          
+    def next(self)-> None:...
+    def init(self)-> None:...

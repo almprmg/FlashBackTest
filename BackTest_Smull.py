@@ -8,12 +8,18 @@ class Bacl_Test_smunll:
         self.data_low = None
         self.tp = None
         self.sl = None
-    def next(self):
+        self.order = None
+        self._postin = False
+    def Trade(self):
         high =  self.data_low.loc[self.data_low.High >= self.tp,'High']
         Low =  self.data_low.loc[self.data_low.Low <= self.sl,'Low']
         check = high.index[0] < Low.index[0]
         if check :
-            return self.data_low.Date[high.index[0]] 
+            self.order.append(1)
+            self.order.append(high.index[0])
+
         else:
-            return self.data_low.Date[Low.index[0]] 
+            self.order.append(0)
+            self.order.append(Low.index[0])
+      
     
