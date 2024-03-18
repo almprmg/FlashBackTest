@@ -13,25 +13,21 @@ class BackTest:
 
         if not isinstance(data,pd.DataFrame):
             raise
-        if not isinstance(data.index,pd.Timestamp()):
-            raise
+        #if not isinstance(data.index,pd.Timestamp):
+        #    raise
          
 
     def run(self):
-        Stratigy = self.Strutigy(self.data_smull)
+        
+        Stratigy = self.Strutigy(self.data_smull,self.data.loc[self.data.Signal != 0 ].index[0])
         Stratigy.init()
         if "Signal" in self.data.columns:
             Stratigy.Date_ende_order = Stratigy.Date =  self.data.loc[self.data.Signal != 0 ].index[0]
 
-            while self.endDate < Stratigy.Date_ende_order :
+            while self.endDate > Stratigy.Date_ende_order :
                 
                 Stratigy.Data = self.data.loc[ self.data.index >= Stratigy.Date ]
                 Stratigy.next()
-                
-                
-                
-            
-
     
 
     
