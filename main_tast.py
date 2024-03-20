@@ -25,7 +25,7 @@ class myClass(Stratigy):
         if signal != None and self.Data.Signal[signal] == 1  :
             self.limet = self.highest_top[signal]
             highest_bot =self.highest_bot[signal]
-            self.sl = highest_bot- ((self.limet - highest_bot) *3) 
+            self.sl =  highest_bot - ((self.limet - highest_bot) *3) 
             self.tp =  highest_bot + ((self.limet - highest_bot) *5) 
             
             self.buy(limet=self.limet ,tp=self.tp,sl= self.sl )

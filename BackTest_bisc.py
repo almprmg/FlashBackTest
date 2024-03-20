@@ -23,13 +23,13 @@ class BackTest:
         Stratigy.init()
         Stratigy.Data = self.data
         if "Signal" in self.data.columns:
-            Stratigy.Date_ende_order =  self.data.loc[self.data.Signal != 0 ].index[0]
+
             #not Stratigy.Data[ Stratigy.Data.Signal != 0 ].empty
             while not Stratigy.Data[ Stratigy.Data.Signal == 1 ].empty :
-               
-                
-              
+                Stratigy.Date_Start_order = Stratigy.Data[ Stratigy.Data.Signal == 1 ].index[0]
                 Stratigy.next()
+                Stratigy.update()
+
         self.result = Stratigy.result_orders
 
     

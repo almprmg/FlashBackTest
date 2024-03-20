@@ -1,12 +1,16 @@
-class orders:
+import pandas as pd
 
+
+class orders:
+    result_orders = pd.DataFrame({"IdOrder":[],"DateStart":[] ,"Enter":[] ,"tp":[],"ls":[] , "Targit":[],"EndDate":[]})
     def __init__(self) -> None:
-        self.order =None
+        self.order = pd.DataFrame({"IdOrder":[0],"Type":[0],"DateStart":[0] ,"Enter":[0] ,"tp":[0],"ls":[0] , "Targit":[0],"EndDate":[0]})
         self.tp = None
         self.sl = None
         self.limet =None
+        self.Date_Start_order =None
         self.Date_ende_order = None
-        self._postin =True
+        self._postin =False
 
         
     def buy(self, limet:float,tp: float,sl:float)-> None:
@@ -14,7 +18,7 @@ class orders:
             self.sl = sl
             self.tp =tp
             self.limet =limet
-            self.order[["DateStart","Enter","tp","ls"]] = [self.Date,limet,tp,sl]
+            self.order[["IdOrder","Type","DateStart","Enter","tp","ls"]] = [0+len( self.result_orders),1,self.Date_Start_order,limet,tp,sl]
             self._postin = True
 
             
@@ -24,6 +28,8 @@ class orders:
         if not self._postin:
             self.sl = sl
             self.tp =tp
+            self.limet =limet
+            self.order[["IdOrder","Type","DateStart","Enter","tp","ls"]] = [0+len( self.result_orders),2,self.Date_Start_order,limet,tp,sl]
             self._postin = True
 
 
@@ -44,3 +50,6 @@ class orders:
         self.order[[ "Targit","EndDate"]] = [0,Date_SL]
         self.Date_ende_order = Date_SL
         self._postin =False
+    def Save_order(self):
+       self.result_orders = pd.concat([self.result_orders,self.order ] ,axis=0,ignore_index=True) 
+
