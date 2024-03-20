@@ -2,55 +2,64 @@
 
 import pandas as pd
 
+from order import orders
 
-class Bacl_Test_smunll:
+
+class Bacl_Test_smunll(orders):
     _postin = False
+    Type = None
+    Date_TP = None 
+    Date_SL = None
     def __init__(self) -> None:
+        super().__init__()
         self.data_low = None
-        self.tp = None
-        self.sl = None
-        self.limet =None
-        self.order = pd.DataFrame({"DateStart":[0] ,"Enter":[0] ,"tp":[0],"ls":[0] , "Targit":[0],"EndDate":[0]})
-
         self.Date_ende_order = None
     
     def Trade(self):
+        self.Check_postion()
+        checkTpNone = self.Date_TP == None and self.Date_SL != None
+        if self.Date_TP != None and self.Date_SL != None  :
+            if (self.Date_TP < self.Date_SL and self.Type) :
+                self.TpOredes_Buy()  
+            elif (self.Date_TP < self.Date_SL):
+                self.TpOredes_Sell()
+            elif (self.Date_TP > self.Date_SL and self.Type) :
+                self.SlOredes_Buy()
+            else : 
+                self.SlOredes_Sell()
+        elif  checkTpNone :
+            if self.Type:
+                self.SlOredes_Buy()
+            else : 
+                self.SlOredes_Sell()
+        elif not checkTpNone :
+            if self.Type:
+                self.SlOredes_Buy()
+            else : 
+                self.SlOredes_Sell()
+    def swap(self):
+         self.Type= self.order[-1][1]
+         if not self.Type :
+            temp = self.tp 
+            self.tp = self.sl
+            self.sl = temp
+         
+
+    @swap
+    def Check_postion(self):
         try:
-            date = self.data_low.index
-            high =  self.data_low.loc[self.data_low.High >= self.tp]
-            Low =  self.data_low.loc[self.data_low.Low <= self.sl]
-            high = high.index[0] if  not high.empty else Low.index[1]
-            Low = Low.index[0] if not Low.empty  else high
-               
-            
-            
-            
-            
-            
-            
 
+
+           
+            Dhigh =  self.data_low.loc[self.data_low.High >= self.tp]
+            DLow =  self.data_low.loc[self.data_low.Low <= self.sl] 
+            self.Date_TP = Dhigh.index[0] if  not Dhigh.empty else None
+            self.Date_SL = DLow.index[0] if not DLow.empty  else None
+            if not self.Type:
+                temp =  self.Date_TP
+                self.Date_TP =self.Date_SL
+                self.Date_SL = temp
         except Exception as ex :
-      
-            print(ex)
+            print(ex)         
 
-            
-
-
-        if high == None and Low == None:
-            self.Date_ende_order = self.data_low.index[-1] 
-            self._postin =False
-        if high != None and Low != None :
-            check = high < Low
-            if check  :
-                self.order[[ "Targit","EndDate"]] = [1,high]
-
-                self.Date_ende_order = high
-                self._postin =False
-    
-            else:
-                self.order[[ "Targit","EndDate"]] = [0,Low]
-                self.Date_ende_order = Low
-                self._postin =False
-    
-        
-    
+     
