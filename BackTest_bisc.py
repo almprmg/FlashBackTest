@@ -24,8 +24,9 @@ class BackTest:
         Stratigy.Data = self.data
         if "Signal" in self.data.columns:
             Stratigy.Date_ende_order =  self.data.loc[self.data.Signal != 0 ].index[0]
-
-            while self.endDate > Stratigy.Date_ende_order :
+            #not Stratigy.Data[ Stratigy.Data.Signal != 0 ].empty
+            while not Stratigy.Data[ Stratigy.Data.Signal == 1 ].empty :
+               
                 
               
                 Stratigy.next()

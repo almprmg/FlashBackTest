@@ -20,7 +20,6 @@ class Bacl_Test_smunll:
             high =  self.data_low.loc[self.data_low.High >= self.tp]
             Low =  self.data_low.loc[self.data_low.Low <= self.sl]
             high = high.index[0] if  not high.empty else Low.index[1]
-            print( high)
             Low = Low.index[0] if not Low.empty  else high
                
             
