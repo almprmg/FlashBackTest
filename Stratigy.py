@@ -13,7 +13,7 @@ class Stratigy(Bacl_Test_smunll):
         super().__init__()
         self.Date = Date
         self.Data : type[pd.DataFrame]
-        self.data_low = data_low.loc[data_low.Date >= self.Date]
+        self.data_low = data_low.loc[data_low.index >= self.Date]
         
         
        
@@ -45,11 +45,13 @@ class Stratigy(Bacl_Test_smunll):
 
 
     def update(self)-> None:
-        self.Data = self.Data.loc[self.Data.Date >  self.Date_ende_order]
+        self.Data = self.Data.iloc[self.Data.index >  self.Date_ende_order,:]
+        self.Data
         data = self.Data.loc[self.Data.Signal != 0]
         if self.Date_ende_order != self.data_low.index[-1] and len(data) !=0 :
-            self.Date =data.index[0][0]
-            self.data_low = self.data_low.loc[self.data_low.Date >=  self.Date]
-        
+            self.Date =data.index[0]
+            self.data_low = self.data_low.iloc[self.data_low.index >=  self.Date,:]
+       
     def next(self)-> None:...
+    
     def init(self)-> None:...

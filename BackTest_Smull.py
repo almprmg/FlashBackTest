@@ -11,26 +11,34 @@ class Bacl_Test_smunll:
         self.sl = None
         self.limet =None
         self.order = pd.DataFrame({"DateStart":[0] ,"Enter":[0] ,"tp":[0],"ls":[0] , "Targit":[0],"EndDate":[0]})
-        
+
         self.Date_ende_order = None
     
     def Trade(self):
         try:
-            high =  self.data_low[self.data_low.High >= self.tp].index[0][0]
-            Low =  self.data_low[self.data_low.Low <= self.sl].index[0][0]
-
+            date = self.data_low.index
+            high =  self.data_low.loc[self.data_low.High >= self.tp]
+            Low =  self.data_low.loc[self.data_low.Low <= self.sl]
+            high = high.index[0] if  not high.empty else Low.index[1]
+            print( high)
+            Low = Low.index[0] if not Low.empty  else high
+               
+            
+            
+            
+            
             
             
 
         except Exception as ex :
+      
             print(ex)
-            high =None
-            Low =None
+
             
 
 
         if high == None and Low == None:
-            self.Date_ende_order = self.data_low.Date[-1] 
+            self.Date_ende_order = self.data_low.index[-1] 
             self._postin =False
         if high != None and Low != None :
             check = high < Low

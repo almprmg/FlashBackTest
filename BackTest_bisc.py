@@ -9,7 +9,7 @@ class BackTest:
         self.data = data
         self.data_smull = data_smull  
         self.Strutigy = Stratigy
-        self.endDate =self.data.Date[-1]
+        self.endDate =self.data.index[-1]
         
         if not isinstance(data,pd.DataFrame):
             raise
@@ -19,14 +19,15 @@ class BackTest:
 
     def run(self):
         
-        Stratigy = self.Strutigy(self.data_smull,self.data.loc[self.data.Signal != 0 ].index[0][0])
+        Stratigy = self.Strutigy(self.data_smull,self.data.loc[self.data.Signal != 0 ].index[0])
         Stratigy.init()
+        Stratigy.Data = self.data
         if "Signal" in self.data.columns:
-            Stratigy.Date_ende_order = Stratigy.Date =  self.data.loc[self.data.Signal != 0 ].index[0][0]
+            Stratigy.Date_ende_order =  self.data.loc[self.data.Signal != 0 ].index[0]
 
             while self.endDate > Stratigy.Date_ende_order :
                 
-                Stratigy.Data = self.data.loc[ self.data.Date >= Stratigy.Date ]
+              
                 Stratigy.next()
         self.result = Stratigy.result_orders
 
