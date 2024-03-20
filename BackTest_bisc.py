@@ -26,7 +26,7 @@ class BackTest:
 
             #not Stratigy.Data[ Stratigy.Data.Signal != 0 ].empty
             while not Stratigy.Data[ Stratigy.Data.Signal == 1 ].empty :
-                Stratigy.Date_Start_order = Stratigy.Data[ Stratigy.Data.Signal == 1 ].index[0]
+
                 Stratigy.next()
                 Stratigy.update()
 

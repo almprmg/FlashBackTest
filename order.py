@@ -2,9 +2,10 @@ import pandas as pd
 
 
 class orders:
-    result_orders = pd.DataFrame({"IdOrder":[],"DateStart":[] ,"Enter":[] ,"tp":[],"ls":[] , "Targit":[],"EndDate":[]})
+    result_orders = pd.DataFrame({"IdOrder":[],"Type":[],"DateStart":[] ,"Enter":[] ,"tp":[],"ls":[] , "Targit":[],"EndDate":[]})
+    order = pd.DataFrame({"IdOrder":[0],"Type":[0],"DateStart":[0] ,"Enter":[0] ,"tp":[0],"ls":[0] , "Targit":[0],"EndDate":[0]})
+    
     def __init__(self) -> None:
-        self.order = pd.DataFrame({"IdOrder":[0],"Type":[0],"DateStart":[0] ,"Enter":[0] ,"tp":[0],"ls":[0] , "Targit":[0],"EndDate":[0]})
         self.tp = None
         self.sl = None
         self.limet =None
@@ -18,7 +19,7 @@ class orders:
             self.sl = sl
             self.tp =tp
             self.limet =limet
-            self.order[["IdOrder","Type","DateStart","Enter","tp","ls"]] = [0+len( self.result_orders),1,self.Date_Start_order,limet,tp,sl]
+            self.order[["IdOrder","Type","DateStart","Enter","tp","ls"]] = ['0'+str(len( self.result_orders)),1,self.Date_Start_order,limet,tp,sl]
             self._postin = True
 
             
