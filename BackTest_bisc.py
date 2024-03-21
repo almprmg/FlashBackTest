@@ -1,14 +1,14 @@
 import pandas as pd 
 import numpy as np
-from Stratigy import Stratigy
+from Stratigy import Strategy
 
 
 
 class BackTest:
-    def __init__(self,data : pd.DataFrame,data_smull,Stratigy :type[Stratigy] ) -> None:
+    def __init__(self,data : pd.DataFrame,data_small,Strategy :type[Strategy] ) -> None:
         self.data = data
-        self.data_smull = data_smull  
-        self.Strutigy = Stratigy
+        self.data_small = data_small  
+        self.Strategy = Strategy
         self.endDate =self.data.index[-1]
         
         if not isinstance(data,pd.DataFrame):
@@ -19,17 +19,17 @@ class BackTest:
 
     def run(self):
         
-        Stratigy = self.Strutigy(self.data_smull,self.data.loc[self.data.Signal != 0 ].index[0])
-        Stratigy.init()
-        Stratigy.Data = self.data
+        Strategy = self.Strategy(self.data_small,self.data.loc[self.data.Signal != 0 ].index[0])
+        Strategy.init()
+        Strategy.Data = self.data
         if "Signal" in self.data.columns:
 
-            #not Stratigy.Data[ Stratigy.Data.Signal != 0 ].empty
-            while not Stratigy.Data[ Stratigy.Data.Signal == 1 ].empty :
+            #not Strategy.Data[ Strategy.Data.Signal != 0 ].empty
+            while not Strategy.Data[ Strategy.Data.Signal == 1 ].empty :
 
-                Stratigy.next()
-                Stratigy.update()
+                Strategy.next()
+                Strategy.update()
 
-        self.result = Stratigy.result_orders
+        self.result = Strategy.result_orders
 
     

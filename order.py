@@ -2,55 +2,55 @@ import pandas as pd
 
 
 class orders:
-    result_orders = pd.DataFrame({"IdOrder":[],"Type":[],"DateStart":[] ,"Enter":[] ,"tp":[],"ls":[] , "Targit":[],"EndDate":[]})
-    order = pd.DataFrame({"IdOrder":[0],"Type":[0],"DateStart":[0] ,"Enter":[0] ,"tp":[0],"ls":[0] , "Targit":[0],"EndDate":[0]})
+    result_orders = pd.DataFrame({"IdOrder":[],"Type":[],"DateStart":[] ,"Enter":[] ,"tp":[],"sl":[] , "Target":[],"EndDate":[]})
+    order = pd.DataFrame({"IdOrder":[0],"Type":[0],"DateStart":[0] ,"Enter":[0] ,"tp":[0],"sl":[0] , "Target":[0],"EndDate":[0]})
     
     def __init__(self) -> None:
         self.tp = None
         self.sl = None
-        self.limet =None
+        self.limit =None
         self.Date_Start_order =None
-        self.Date_ende_order = None
-        self._postin =False
+        self.Date_end_order = None
+        self._position =False
 
         
-    def buy(self, limet:float,tp: float,sl:float)-> None:
-        if not self._postin:
+    def buy(self, limit:float,tp: float,sl:float)-> None:
+        if not self._position:
             self.sl = sl
             self.tp =tp
-            self.limet =limet
-            self.order[["IdOrder","Type","DateStart","Enter","tp","ls"]] = ['0'+str(len( self.result_orders)),1,self.Date_Start_order,limet,tp,sl]
-            self._postin = True
+            self.limit =limit
+            self.order[["IdOrder","Type","DateStart","Enter","tp","sl"]] = ['1'+str(len( self.result_orders)),1,self.Date_Start_order,limit,tp,sl]
+            self._position = True
 
             
 
             
-    def sell(self, limet:float,tp: float,sl:float):
-        if not self._postin:
+    def sell(self, limit:float,tp: float,sl:float):
+        if not self._position:
             self.sl = sl
             self.tp =tp
-            self.limet =limet
-            self.order[["IdOrder","Type","DateStart","Enter","tp","ls"]] = [0+len( self.result_orders),2,self.Date_Start_order,limet,tp,sl]
-            self._postin = True
+            self.limit =limit
+            self.order[["IdOrder","Type","DateStart","Enter","tp","sl"]] = ['0'+str(len( self.result_orders)),2,self.Date_Start_order,limit,tp,sl]
+            self._position = True
 
 
 
-    def TpOredes_Buy(self,Date_TP):
-        self.order[[ "Targit","EndDate"]] = [1,Date_TP]
-        self.Date_ende_order = Date_TP
-        self._postin =False
-    def SlOredes_Buy(self,Date_SL):
-        self.order[[ "Targit","EndDate"]] = [0,Date_SL]
-        self.Date_ende_order = Date_SL
-        self._postin =False
-    def TpOredes_Sell(self,Date_TP):
-        self.order[[ "Targit","EndDate"]] = [2,Date_TP]
-        self.Date_ende_order = Date_TP
-        self._postin =False
-    def SlOredes_Sell(self,Date_SL):
-        self.order[[ "Targit","EndDate"]] = [0,Date_SL]
-        self.Date_ende_order = Date_SL
-        self._postin =False
+    def saveTpOrdersBuy(self,Date_TP):
+        self.order[[ "Target","EndDate"]] = [1,Date_TP]
+        self.Date_end_order = Date_TP
+        self._position =False
+    def saveSlOrdersBuy(self,Date_SL):
+        self.order[[ "Target","EndDate"]] = [0,Date_SL]
+        self.Date_end_order = Date_SL
+        self._position =False
+    def saveTpOrdersSell(self,Date_TP):
+        self.order[[ "Target","EndDate"]] = [2,Date_TP]
+        self.Date_end_order = Date_TP
+        self._position =False
+    def saveSlOrdersSell(self,Date_SL):
+        self.order[[ "Target","EndDate"]] = [0,Date_SL]
+        self.Date_end_order = Date_SL
+        self._position =False
     def Save_order(self):
        self.result_orders = pd.concat([self.result_orders,self.order ] ,axis=0,ignore_index=True) 
 

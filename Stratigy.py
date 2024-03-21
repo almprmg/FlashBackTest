@@ -1,10 +1,10 @@
 
 
 import pandas as pd
-from BackTest_Smull import Bacl_Test_smunll 
+from BackTest_Smull import Best_Test_small 
 
 
-class Stratigy(Bacl_Test_smunll):
+class Strategy(Best_Test_small):
 
     
     

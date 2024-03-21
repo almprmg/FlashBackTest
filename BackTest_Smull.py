@@ -1,12 +1,11 @@
 
 
-import pandas as pd
 
-from order import orders
+from Order import orders
 
 
-class Bacl_Test_smunll(orders):
-    _postin = False
+class Best_Test_small(orders):
+    _position = False
     Type = None
     Date_TP = None 
     Date_SL = None
@@ -17,27 +16,27 @@ class Bacl_Test_smunll(orders):
 
     
     def Trade(self):
-        self.Check_postion()
+        self.Check_position()
 
         if self.Date_TP != None and self.Date_SL != None  :
             if (self.Date_TP < self.Date_SL and self.Type == 1) :
-                self.TpOredes_Buy(self.Date_TP)  
+                self.saveTpOrdersBuy(self.Date_TP)  
             elif (self.Date_TP < self.Date_SL):
-                self.TpOredes_Sell(self.Date_TP)
+                self.saveTpOrdersSell(self.Date_TP)
             elif (self.Date_TP > self.Date_SL and self.Type == 1) :
-                self.SlOredes_Buy(self.Date_SL)
+                self.saveSlOrdersBuy(self.Date_SL)
             elif (self.Date_TP > self.Date_SL and self.Type == 2): 
-                self.SlOredes_Sell(self.Date_SL)
+                self.saveSlOrdersSell(self.Date_SL)
         elif  self.Date_TP == None and self.Date_SL != None :
             if self.Type:
-                self.SlOredes_Buy(self.Date_SL)
+                self.saveSlOrdersBuy(self.Date_SL)
             else : 
-                self.SlOredes_Sell(self.Date_SL)
+                self.saveSlOrdersSell(self.Date_SL)
         elif self.Date_TP != None and self.Date_SL == None :
             if self.Type:
-                self.TpOredes_Buy(self.Date_TP)
+                self.saveTpOrdersBuy(self.Date_TP)
             else : 
-                self.TpOredes_Sell(self.Date_TP)
+                self.saveTpOrdersSell(self.Date_TP)
     def swap(self):
 
          self.Type= self.order['Type'][0]
@@ -48,7 +47,7 @@ class Bacl_Test_smunll(orders):
          
 
     
-    def Check_postion(self):
+    def Check_position(self):
        
             self.swap()
             Dhigh =  self.data_low.loc[self.data_low.High >= self.tp]
