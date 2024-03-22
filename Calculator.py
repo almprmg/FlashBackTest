@@ -11,8 +11,8 @@ class Calculator_Traded:
     RatioEntry
     CP = cumulative profit
     """
- 
-    def __init__(self,Cash : int = 1000 ,RatioEntry :int =100 ,Fees : int = None, CP : bool = False ) -> None:
+    amount :float
+    def __init__(self,Cash : int = 1000 ,RatioEntry :int =1000 ,Fees : int = None, CP : bool = False ) -> None:
         
         self.Cash =  Cash
         self.amount : float
@@ -20,26 +20,43 @@ class Calculator_Traded:
         self.CP = CP
         self.Retail = int
         self.Fees =Fees
-        
+
     def initCash(self):
         self.Retail = 100 / self.RatioEntry 
         self.amount = self.Cash /  self.Retail
+        self.fees()
 
     def fees(self):
+        print(self.amount)
         Fees = self.amount * self.Fees
-        self.amount = self.amount -Fees
-    def different(self,result: type[pd.DataFrame]):
-        result['PriceEndOrder']  =  [row["tp"] if row['Target'] == 1 else row["sl"]  for _,row in result.iterrows()]
-        result['different'] = result[['Enter','PriceEndOrder']].diff(axis=1)['PriceEndOrder']
-        return result
+        self.amount = self.amount - Fees
+        print(self.amount)
+    def different(func):
+        def fuc_wrapper(self,result):
+            
+            result['PriceEndOrder']  =  [row["tp"] if row['Target'] == 1 else row["sl"]  for _,row in result.iterrows()]
+            result['different'] = result[['Enter','PriceEndOrder']].diff(axis=1)['PriceEndOrder']
+            result = func(self,result) 
+            return result
+        return fuc_wrapper
     
     
-    def quantitySymbol(self,result: type[pd.DataFrame]):
-        result['Quantity'] = result['Enter'] * self.amount
-        return result
+    def quantitySymbol(func):
+        def fuc_wrapper(self,result):
 
-    def profit(self,result: type[pd.DataFrame]):
-        result['Profit'] = result['Quantity'] * result['different']
+            self.initCash()
+           
+            result['Quantity'] =  self.amount / result['Enter']
+            result= func(self,result)
+            return result
+        return fuc_wrapper
+    @quantitySymbol
+    @different
+    def profit(self,result):
+        result['ProfitTrade'] = round(result['Quantity'] * result['different'],3)
+        result['CumProfit'] = result['ProfitTrade'].cumsum()
+        result['RisoProfit'] = ((result['PriceEndOrder'] - result['Enter'])/result["Enter"]) * 100
+        result['RisoTRADE'] = (result['ProfitTrade'] /( result['Quantity'] * result['Enter'])) * 100
         return result
 
 
