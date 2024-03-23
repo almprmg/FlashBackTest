@@ -23,7 +23,26 @@ class Strategy(Best_Test_small):
         if self.Date_end_order != self.data_low.index[-1] and len(data) !=0 :
             self.Date_Start_order =data.index[0]
             self.data_low = self.data_low.iloc[self.data_low.index >=  self.Date_Start_order,:]
-    
+    def buy(self, limit:float,tp: float,sl:float)-> None:
+        if not self._position:
+            self.sl = sl
+            self.tp =tp
+            self.limit =limit
+            self.order[["IdOrder","Type","DateStart","Enter","tp","sl"]] = ['1'+str(len( self.result_orders)),1,self.Date_Start_order,limit,tp,sl]
+            self._position = True
+
+            
+
+            
+    def sell(self, limit:float,tp: float,sl:float):
+        if not self._position:
+            self.sl = sl
+            self.tp =tp
+            self.limit =limit
+            self.order[["IdOrder","Type","DateStart","Enter","tp","sl"]] = ['0'+str(len( self.result_orders)),2,self.Date_Start_order,limit,tp,sl]
+            self._position = True
+
+
     def next(self)-> None:...
     
     def init(self)-> None:...

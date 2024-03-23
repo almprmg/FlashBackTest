@@ -20,25 +20,23 @@ class Best_Test_small(orders):
 
         if self.Date_TP != None and self.Date_SL != None  :
             if (self.Date_TP < self.Date_SL and self.Type == 1) :
-                self.saveTpOrdersBuy(self.Date_TP)  
+                self.CloseOrder(1,self.Date_TP)  
             elif (self.Date_TP < self.Date_SL):
-                self.saveTpOrdersSell(self.Date_TP)
+                 self.CloseOrder(2,self.Date_TP)
             elif (self.Date_TP > self.Date_SL and self.Type == 1) :
-                self.saveSlOrdersBuy(self.Date_SL)
+                self.CloseOrder(0,self.Date_SL)
             elif (self.Date_TP > self.Date_SL and self.Type == 2): 
-                self.saveSlOrdersSell(self.Date_SL)
-            self.Save_order()
+                self.CloseOrder(0,self.Date_SL)
         elif  self.Date_TP == None and self.Date_SL != None :
             if self.Type:
-                self.saveSlOrdersBuy(self.Date_SL)
+                self.CloseOrder(0,self.Date_SL)
             else : 
-                self.saveSlOrdersSell(self.Date_SL)
+                self.CloseOrder(0,self.Date_SL)
         elif self.Date_TP != None and self.Date_SL == None :
             if self.Type:
-                self.saveTpOrdersBuy(self.Date_TP)
+                self.CloseOrder(1,self.Date_TP)
             else : 
-                self.saveTpOrdersSell(self.Date_TP)
-            self.Save_order()
+                self.CloseOrder(2,self.Date_TP)
     def swap(self):
 
          self.Type= self.order['Type'][0]
