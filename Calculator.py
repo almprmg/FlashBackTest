@@ -24,13 +24,11 @@ class Calculator_Traded:
     def initCash(self):
         self.Retail = 100 / self.RatioEntry 
         self.amount = self.Cash /  self.Retail
-        self.fees()
 
-    def fees(self):
-        print(self.amount)
-        Fees = self.amount * self.Fees
-        self.amount = self.amount - Fees
-        print(self.amount)
+    def fees(self,row):
+        Fees = row * self.Fees
+        return abs(Fees)
+
     def different(func):
         def fuc_wrapper(self,result):
             
@@ -45,18 +43,21 @@ class Calculator_Traded:
         def fuc_wrapper(self,result):
 
             self.initCash()
-           
+            result['FeesOpen'] = self.fees(self.amount)
             result['Quantity'] =  self.amount / result['Enter']
             result= func(self,result)
             return result
         return fuc_wrapper
-    @quantitySymbol
     @different
+    @quantitySymbol
     def profit(self,result):
+
         result['ProfitTrade'] = round(result['Quantity'] * result['different'],3)
+        result['FeesClose'] =  result['ProfitTrade'].add(self.amount).apply(self.fees)
+        result['ProfitTrade']= result[['ProfitTrade','FeesClose']].diff(axis=1,periods=-1)['ProfitTrade'].round(3)
         result['CumProfit'] = result['ProfitTrade'].cumsum()
-        result['RisoProfit'] = ((result['PriceEndOrder'] - result['Enter'])/result["Enter"]) * 100
-        result['RisoTRADE'] = (result['ProfitTrade'] /( result['Quantity'] * result['Enter'])) * 100
+        result['PctProfit'] = result[["Enter","PriceEndOrder"]].pct_change(axis="columns",periods=1)["PriceEndOrder"]*100
+        
         return result
 
 
