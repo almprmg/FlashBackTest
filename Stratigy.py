@@ -16,8 +16,7 @@ class Strategy(Best_Test_small):
         self.data_low = data_low.loc[data_low.index >= self.Date_Start_order]
     
     def update(self)-> None:
-        self.Trade()
-        self.Save_order()
+
         self.Data = self.Data.iloc[self.Data.index >  self.Date_end_order,:]
         self.Data
         data = self.Data.loc[self.Data.Signal == 1]

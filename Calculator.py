@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-class Calculator_Traded:
+class CalculatorTraded:
     """
     First discrete difference of element.
         .......et
@@ -11,8 +11,7 @@ class Calculator_Traded:
     RatioEntry
     CP = cumulative profit
     """
-    amount :float
-    def __init__(self,Cash : int = 1000 ,RatioEntry :int =1000 ,Fees : int = None, CP : bool = False ) -> None:
+    def __init__(self,Cash,RatioEntry ,Fees , CP ) -> None:
         
         self.Cash =  Cash
         self.amount : float
