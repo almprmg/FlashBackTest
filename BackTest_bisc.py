@@ -14,13 +14,13 @@ class  BackTest:
     ----------
     Cash 
     RatioEntry
-    CP = cumulative profit
+    cp = cumulative profit
     """
     def __init__(self,
                  data : pd.DataFrame,data_small :  pd.DataFrame,
                  strategy :type[Strategy],Cash : int = 1000 ,
                  RatioEntry :int =1000 ,Fees : float = 0.001,
-                 CP : bool = False ) -> None:
+                cp : bool = False ) -> None:
 
         
         if not (isinstance(strategy, type) and issubclass(strategy, Strategy)):
@@ -39,7 +39,7 @@ class  BackTest:
         self.data_small = data_small  
         self.Strategy = strategy
         self.endDate =self.data.index[-1]
-        self.CalTraded = CalculatorTraded(Cash ,RatioEntry ,Fees , CP  )
+        self.CalTraded = CalculatorTraded(Cash ,RatioEntry ,Fees ,cp )
 
     def run(self):
         

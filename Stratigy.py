@@ -28,9 +28,8 @@ class Strategy(Best_Test_small):
             self.sl = sl
             self.tp =tp
             self.limit =limit
-            self.order[["IdOrder","Type","DateStart","Enter","tp","sl"]] = ['1'+str(len( self.result_orders)),1,self.Date_Start_order,limit,tp,sl]
             self._position = True
-
+            self.OpenOrder("1",limit,tp,sl)
             
 
             
@@ -39,9 +38,8 @@ class Strategy(Best_Test_small):
             self.sl = sl
             self.tp =tp
             self.limit =limit
-            self.order[["IdOrder","Type","DateStart","Enter","tp","sl"]] = ['0'+str(len( self.result_orders)),2,self.Date_Start_order,limit,tp,sl]
             self._position = True
-
+            self.OpenOrder("2",limit,tp,sl)
 
     def next(self)-> None:...
     

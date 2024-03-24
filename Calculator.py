@@ -1,16 +1,6 @@
 import pandas as pd
 
-
-class CalculatorTraded:
-    """
-    First discrete difference of element.
-        .......et
-    Parameters
-    ----------
-    Cash 
-    RatioEntry
-    CP = cumulative profit
-    """
+class Money:
     def __init__(self,Cash,RatioEntry ,Fees , CP ) -> None:
         
         self.Cash =  Cash
@@ -27,6 +17,23 @@ class CalculatorTraded:
     def fees(self,row):
         Fees = row * self.Fees
         return abs(Fees)
+
+    
+
+class CalculatorTraded(Money):
+    """
+    First discrete difference of element.
+        .......et
+    Parameters
+    ----------
+    Cash 
+    RatioEntry
+    CP = cumulative profit
+    """
+    def __init__(self,Cash,RatioEntry ,Fees , CP ) -> None:
+        super().__init__(Cash,RatioEntry ,Fees , CP )
+        
+
 
     def different(func):
         def fuc_wrapper(self,result):
