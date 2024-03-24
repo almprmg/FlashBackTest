@@ -14,26 +14,14 @@ class orders:
         self._position =False
 
     
-    def OpenOrder(self):
-        pass
+    def OpenOrder(self,type_order,limit,tp,sl):
+        self.order[["IdOrder","Type","DateStart","Enter","tp","sl"]] = [type_order+str(len( self.result_orders)),1,self.Date_Start_order,limit,tp,sl]
+
+ 
 
     def CloseOrder(self,goal:bool,Date):
         self.order[[ "Target","EndDate"]] = [goal,Date]
         self.Date_end_order = Date
         self._position =False
-        self.result_orders = pd.concat([self.result_orders,self.order ] ,axis=0,ignore_index=True) 
-    #def saveSlOrdersBuy(self,Date_SL):
-    #    self.order[[ "Target","EndDate"]] = [0,Date_SL]
-    #    self.Date_end_order = Date_SL
-    #    self._position =False
-    #def saveTpOrdersSell(self,Date_TP):
-    #    self.order[[ "Target","EndDate"]] = [2,Date_TP]
-    #    self.Date_end_order = Date_TP
-    #    self._position =False
-    #def saveSlOrdersSell(self,Date_SL):
-    #    self.order[[ "Target","EndDate"]] = [0,Date_SL]
-    #    self.Date_end_order = Date_SL
-    #    self._position =False
-    #def Save_order(self):
-       
+        self.result_orders = pd.concat([self.result_orders,self.order ] ,axis=0,ignore_index=True)        
 
