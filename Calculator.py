@@ -68,10 +68,17 @@ class CalculatorTraded(Money):
     @quantitySymbol
     def __profit(self,result):
         result['ProfitTrade'] = round(result['Quantity'] * result['different'],3)
-        result['FeesClose'] =  self.fees(result['ProfitTrade'] + self.amount)
+        result['FeesClose'] =  round(self.fees(result['ProfitTrade'] + self.amount),3)
         result['ProfitTrade']= result['ProfitTrade'] - result['FeesClose']
-        # result['CumProfit'] = result['ProfitTrade'].cumsum()
-        # result['PctProfit'] = result[["Enter","PriceEndOrder"]].pct_change(axis="columns",periods=1)["PriceEndOrder"]*100
+        
+        if self.__cp:
+            self.Cash += result['ProfitTrade'] 
+            result['CumProfit'] =self.Cash
+            result['PctProfit'] = result[["Enter","PriceEndOrder"]].pct_change(periods=1)["PriceEndOrder"]*100
+
+        else:
+            result['CumProfit'] = result['ProfitTrade'].cumsum() +  self.Cash
+            result['PctProfit'] = result[["Enter","PriceEndOrder"]].pct_change(axis="columns",periods=1)["PriceEndOrder"]*100
         
         return result
 
