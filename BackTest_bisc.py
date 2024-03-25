@@ -49,7 +49,7 @@ class  BackTest:
         if "Signal" in self.data.columns:
 
             #not Strategy.Data[ Strategy.Data.Signal != 0 ].empty
-            while not Strategy.Data[ Strategy.Data.Signal == 1 ].empty :
+            while not Strategy.Data[ Strategy.Data.Signal != 0 ].empty :
 
                 Strategy.next()
                 Strategy.trade()

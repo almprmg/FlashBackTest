@@ -39,23 +39,23 @@ class CalculatorTraded(Money):
         def fuc_wrapper(self,result):
             result = result
             if self.__cp:
-                result['PriceEndOrder']  =  result["tp"] if result['Target'] == 1 else result["sl"]
+                result['PriceEndOrder']  =  result["tp"] if result['Target'] != 0 else result["sl"]
             else:
-                result['PriceEndOrder']  =  [row["tp"] if row['Target'] == 1 else row["sl"]  for _,row in result.iterrows() ]
+                result['PriceEndOrder']  =  [row["tp"] if row['Target'] != 0 else row["sl"]  for _,row in result.iterrows() ]
             result = func(self,result) 
             return result
         return fuc_wrapper
 
-    def different(func):
+    def __different(func):
         def fuc_wrapper(self,result):
   
-            result['different'] =  result['PriceEndOrder'] - result['Enter']
+            result['different'] =  result['PriceEndOrder'] - result['Enter'] if result['Type'] == 1  else  result['Enter'] - result['PriceEndOrder']
             result = func(self,result) 
             return result
         return fuc_wrapper
     
     
-    def quantitySymbol(func):
+    def __quantitySymbol(func):
         def fuc_wrapper(self,result):
             self.initCash()
             result['FeesOpen'] = self.fees(self.amount)
@@ -64,8 +64,8 @@ class CalculatorTraded(Money):
             return result
         return fuc_wrapper
     @priceEnd
-    @different
-    @quantitySymbol
+    @__different
+    @__quantitySymbol
     def __profit(self,result):
         result['ProfitTrade'] = round(result['Quantity'] * result['different'],3)
         result['FeesClose'] =  round(self.fees(result['ProfitTrade'] + self.amount),3)

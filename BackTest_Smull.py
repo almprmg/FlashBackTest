@@ -1,5 +1,5 @@
 
-from Order import orders
+from order import orders
 
 
 class Best_Test_small(orders):
@@ -21,6 +21,10 @@ class Best_Test_small(orders):
             elif (self._date_tp > self._date_sl and self._type == 1) :
                 self._close_order(0,self._date_sl)
             elif (self._date_tp > self._date_sl and self._type == 2): 
+                self._close_order(0,self._date_sl)
+            elif (self._date_tp == self._date_sl and self._type == 2): 
+                self._close_order(0,self._date_sl)
+            elif (self._date_tp == self._date_sl and self._type == 1): 
                 self._close_order(0,self._date_sl)
         elif  self._date_tp == None and self._date_sl != None :
             if self._type:

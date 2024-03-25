@@ -26,12 +26,13 @@ class orders:
             DLow =  self.data_low.loc[self.data_low.Low <= self.sl] 
             self._date_tp = Dhigh.index[0] if  not Dhigh.empty else None
             self._date_sl = DLow.index[0] if not DLow.empty  else None
-            if not self._type:
+            if self._type == 2:
                 temp =  self._date_tp
                 self._date_tp =self._date_sl
                 self._date_sl = temp
     def _open_order(self,type_order,limit,tp,sl):
-        self.__order[["IdOrder","Type","DateStart","Enter","tp","sl"]] = [type_order+str(len( self._result_orders)),1,self.Date_Start_order,limit,tp,sl]
+        self._type =type_order
+        self.__order[["IdOrder","Type","DateStart","Enter","tp","sl"]] = [str(type_order)+str(len( self._result_orders)),type_order,self.Date_Start_order,limit,tp,sl]
 
  
 
@@ -42,10 +43,10 @@ class orders:
         self._result_orders = pd.concat([self._result_orders,self.__order ] ,axis=0,ignore_index=True)        
 
     def swap(self):
-
-         self._type= self.__order['Type'][0]
-         if self._type == 2 :
-            temp = self.tp 
-            self.tp = self.sl
-            self.sl = temp
+   
+        self._type= self.__order['Type'].values[0]
+        if self._type == 2 :
+           temp = self.tp 
+           self.tp = self.sl
+           self.sl = temp
          

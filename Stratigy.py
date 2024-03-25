@@ -19,7 +19,7 @@ class Strategy(Best_Test_small):
 
         self.Data = self.Data.iloc[self.Data.index >  self.Date_end_order,:]
         self.Data
-        data = self.Data.loc[self.Data.Signal == 1]
+        data = self.Data.loc[self.Data.Signal != 0]
         if self.Date_end_order != self.data_low.index[-1] and len(data) !=0 :
             self.Date_Start_order =data.index[0]
             self.data_low = self.data_low.iloc[self.data_low.index >=  self.Date_Start_order,:]
@@ -29,7 +29,7 @@ class Strategy(Best_Test_small):
             self.tp =tp
             self.limit =limit
             self._position = True
-            self._open_order("1",limit,tp,sl)
+            self._open_order(1,limit,tp,sl)
             
 
             
@@ -39,7 +39,7 @@ class Strategy(Best_Test_small):
             self.tp =tp
             self.limit =limit
             self._position = True
-            self.OpenOrder("2",limit,tp,sl)
+            self._open_order(2,limit,tp,sl)
 
     def next(self)-> None:...
     
