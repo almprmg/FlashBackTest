@@ -1,63 +1,40 @@
 
-
-
 from Order import orders
 
 
 class Best_Test_small(orders):
     _position = False
-    Type = None
-    Date_TP = None 
-    Date_SL = None
+   
     def __init__(self) -> None:
         super().__init__()
-        self.data_low = None
-        self.Date_ende_order = None
+
 
     
-    def Trade(self):
-        self.Check_position()
+    def trade(self):
+        self._process_order()
 
-        if self.Date_TP != None and self.Date_SL != None  :
-            if (self.Date_TP < self.Date_SL and self.Type == 1) :
-                self.CloseOrder(1,self.Date_TP)  
-            elif (self.Date_TP < self.Date_SL):
-                 self.CloseOrder(2,self.Date_TP)
-            elif (self.Date_TP > self.Date_SL and self.Type == 1) :
-                self.CloseOrder(0,self.Date_SL)
-            elif (self.Date_TP > self.Date_SL and self.Type == 2): 
-                self.CloseOrder(0,self.Date_SL)
-        elif  self.Date_TP == None and self.Date_SL != None :
-            if self.Type:
-                self.CloseOrder(0,self.Date_SL)
+        if self._date_tp != None and self._date_sl != None  :
+            if (self._date_tp < self._date_sl and self._type == 1) :
+                self._close_order(1,self._date_tp)  
+            elif (self._date_tp < self._date_sl):
+                 self._close_order(2,self._date_tp)
+            elif (self._date_tp > self._date_sl and self._type == 1) :
+                self._close_order(0,self._date_sl)
+            elif (self._date_tp > self._date_sl and self._type == 2): 
+                self._close_order(0,self._date_sl)
+        elif  self._date_tp == None and self._date_sl != None :
+            if self._type:
+                self._close_order(0,self._date_sl)
             else : 
-                self.CloseOrder(0,self.Date_SL)
-        elif self.Date_TP != None and self.Date_SL == None :
-            if self.Type:
-                self.CloseOrder(1,self.Date_TP)
+                self._close_order(0,self._date_sl)
+        elif self._date_tp != None and self._date_sl == None :
+            if self._type:
+                self._close_order(1,self._date_tp)
             else : 
-                self.CloseOrder(2,self.Date_TP)
-    def swap(self):
-
-         self.Type= self.order['Type'][0]
-         if self.Type == 2 :
-            temp = self.tp 
-            self.tp = self.sl
-            self.sl = temp
-         
+                self._close_order(2,self._date_tp)
 
     
-    def Check_position(self):
-       
-            self.swap()
-            Dhigh =  self.data_low.loc[self.data_low.High >= self.tp]
-            DLow =  self.data_low.loc[self.data_low.Low <= self.sl] 
-            self.Date_TP = Dhigh.index[0] if  not Dhigh.empty else None
-            self.Date_SL = DLow.index[0] if not DLow.empty  else None
-            if not self.Type:
-                temp =  self.Date_TP
-                self.Date_TP =self.Date_SL
-                self.Date_SL = temp
-       
+
+
 
      

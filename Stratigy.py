@@ -29,7 +29,7 @@ class Strategy(Best_Test_small):
             self.tp =tp
             self.limit =limit
             self._position = True
-            self.OpenOrder("1",limit,tp,sl)
+            self._open_order("1",limit,tp,sl)
             
 
             

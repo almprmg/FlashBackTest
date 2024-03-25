@@ -52,10 +52,10 @@ class  BackTest:
             while not Strategy.Data[ Strategy.Data.Signal == 1 ].empty :
 
                 Strategy.next()
-                Strategy.Trade()
+                Strategy.trade()
                 Strategy.update()
         
-        self.result = self.CalTraded.profit(Strategy.result_orders)
+        self.result = self.CalTraded.profit(Strategy._result_orders)
 
 
     
