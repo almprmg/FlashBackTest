@@ -2,7 +2,7 @@ from numbers import Number
 import pandas as pd 
 import numpy as np
 from Stratigy import Strategy
-from Calculator import CalculatorTraded
+from Calculator import unCumulative_Trade_profit,cumulative_trade_profit
 
 
 
@@ -34,12 +34,17 @@ class  BackTest:
                             'entry order price')
         
         
-        
+        if cp:
+            self.CalTraded = cumulative_trade_profit(Cash ,RatioEntry ,Fees)
+        else:
+            self.CalTraded = unCumulative_Trade_profit(Cash ,RatioEntry ,Fees)
+            
+
         self.data = data
         self.data_small = data_small  
         self.Strategy = strategy
         self.endDate =self.data.index[-1]
-        self.CalTraded = CalculatorTraded(Cash ,RatioEntry ,Fees ,cp )
+  
 
     def run(self):
         
@@ -54,7 +59,6 @@ class  BackTest:
                 Strategy.next()
                 Strategy.trade()
                 Strategy.update()
-        
         self.result = self.CalTraded.profit(Strategy._result_orders)
 
 
