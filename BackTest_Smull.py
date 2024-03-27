@@ -12,30 +12,41 @@ class Best_Test_small(orders):
     
     def trade(self):
         self._process_order()
+        self._date_tp != None or self._date_sl != None
+        if self._date_tp != None or self._date_sl != None:
+            if self.is_unknown() :
+                    if self.is_win():
+                            return 
+                    self.is_loss()
+                
 
-        if self._date_tp != None and self._date_sl != None  :
-            if (self._date_tp < self._date_sl and self._type == 1) :
-                self._close_order(1,self._date_tp)  
-            elif (self._date_tp < self._date_sl):
-                 self._close_order(2,self._date_tp)
-            elif (self._date_tp > self._date_sl and self._type == 1) :
-                self._close_order(0,self._date_sl)
-            elif (self._date_tp > self._date_sl and self._type == 2): 
-                self._close_order(0,self._date_sl)
-            elif (self._date_tp == self._date_sl and self._type == 2): 
-                self._close_order(0,self._date_sl)
-            elif (self._date_tp == self._date_sl and self._type == 1): 
-                self._close_order(0,self._date_sl)
-        elif  self._date_tp == None and self._date_sl != None :
-            if self._type:
-                self._close_order(0,self._date_sl)
-            else : 
-                self._close_order(0,self._date_sl)
-        elif self._date_tp != None and self._date_sl == None :
-            if self._type:
+
+
+    def is_unknown(self):
+        if self._date_tp == None and self._date_sl != None  :
+            self._close_order(0,self._date_sl)
+            return False
+        elif self._date_tp == self._date_sl:
+            self._close_order(0,self._date_sl)
+            return False
+        return True
+
+    def is_win(self):
+            if  self._date_tp != None and self._date_sl == None:
                 self._close_order(1,self._date_tp)
-            else : 
-                self._close_order(2,self._date_tp)
+                return True
+            elif self._date_tp < self._date_sl :
+                self._close_order(1,self._date_tp)
+                return True
+            return False
+            
+
+    def is_loss(self):
+        if  self._date_tp > self._date_sl:
+            self._close_order(0,self._date_sl) # mean 0 close order loss 
+            return True
+        return False
+        
 
     
 
