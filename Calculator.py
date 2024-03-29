@@ -49,8 +49,7 @@ class CalculatorProfit(metaclass=ABCMeta):
             pd.DataFrame: _description_
         """
         def fuc_wrapper(self,result):
-            result['different'] =  result['PriceEndOrder'] - result['Enter'] if result['Type'] == 1\
-                else  result['Enter'] - result['PriceEndOrder']
+            result['different'] =  result['PriceEndOrder'] - result['Enter'] if result['Type'] == 1 else  result['Enter'] - result['PriceEndOrder']
             result = func(self,result)
             return result
         return fuc_wrapper
@@ -66,11 +65,10 @@ class CalculatorProfit(metaclass=ABCMeta):
             pd.DataFrame: _description_
         """
         def fuc_wrapper(self,result):
-            self.initCash()
+            self.init_cash()
             result['FeesOpen'] = self.fees(self.amount)
             result['Quantity'] =  self.amount / result['Enter']
-            result= func(self,result)
-            return result
+            return  func(self,result)
         return fuc_wrapper
     @staticmethod
 
@@ -87,14 +85,14 @@ class CalculatorProfit(metaclass=ABCMeta):
             result['ProfitTrade'] = round(result['Quantity'] * result['different'],3)
             result['FeesClose'] =  round(self.fees(result['ProfitTrade'] + self.amount),3)
             result['ProfitTrade']= result['ProfitTrade'] - result['FeesClose']
-            result = func(self,result)
-            return result
+            return func(self,result)
         return fuc_wrapper
+    @staticmethod
+    def price_end(result: pd.DataFrame =None ) -> list:
+        """samry
+        ."""
+        return [row["tp"] if row['Target'] != 0 else row["sl"] for _,row in result.iterrows()]
 
-    @abstractmethod
-    def price_end(self,func)-> None:
-        """_summary_.
-        """
     @abstractmethod
     def cumulative_profit(self,result)-> None:
         """_summary_.
@@ -113,63 +111,36 @@ class UnCumulativeTradeProfit(CalculatorProfit,Money):
     RatioEntry
     CP = cumulative profit
     """
-    def price_end(self,func):
-        def fuc_wrapper(self,result) :
-            result['PriceEndOrder']  = \
-                [row["tp"] if row['Target'] != 0 else row["sl"] for _,row in result.iterrows() ]
-            return func(self,result)
-        return fuc_wrapper
-    @price_end
+
     @CalculatorProfit.different
     @CalculatorProfit.quantity_symbol
     @CalculatorProfit.profit_trade
-    def cumulative_profit(self,result : pd.DataFrame)-> pd.DataFrame:
+    def cumulative_profit(self,result:pd.DataFrame) -> pd.DataFrame:
 
         result['CumProfit'] = result['ProfitTrade'].cumsum() +  self.cash
-        result['PctProfit'] = result[["Enter",
-                                    "PriceEndOrder"]]\
-                                    .pct_change(axis="columns",periods=1)["PriceEndOrder"] * 100
+        ep_result = result[["Enter","PriceEndOrder"]]
+        result['PctProfit'] = ep_result.pct_change(axis="columns",periods=1)["PriceEndOrder"] * 100
         return result
-    def profit(self,result):
+    def profit(self,result: pd.DataFrame) -> pd.DataFrame:
         """_summary_
-
-        Args:
-            result (_type_): _description_
-
-        Returns:
-            _type_: _description_
         """
+        result['PriceEndOrder'] = self.price_end(result)
         return self.cumulative_profit(result)
 
 class CumulativeTradeProfit(CalculatorProfit,Money):
     """There is no need to override 'price_end' it has the same
         signature as the implementation in CalculatorProfit.
-        .......et
-    Parameters
-    ----------
-    Cash
-    RatioEntry
-    CP = cumulative profit.
     """
-    def price_end(self,func):
-
-        def fuc_wrapper(self,result):
-            result['PriceEndOrder']  =  result["tp"] if result['Target'] != 0 else result["sl"]
-            return func(self,result)
-        return fuc_wrapper
-
-    @price_end
     @CalculatorProfit.different
     @CalculatorProfit.quantity_symbol
     @CalculatorProfit.profit_trade
-    def cumulative_profit(self,result:pd.DataFrame) -> pd.DataFrame:
+    def cumulative_profit(self ,result:pd.DataFrame) -> pd.DataFrame:
         self.cash += result['ProfitTrade']
         result['CumProfit'] =self.cash
-        result['PctProfit'] = result[["Enter",
-                                      "PriceEndOrder"]]\
-                                          .pct_change(periods=1)["PriceEndOrder"]*100
+        ep_result = result[["Enter" ,"PriceEndOrder"]]
+        result['PctProfit'] = ep_result.pct_change(periods=1)["PriceEndOrder"]*100
         return  result
-    def profit(self,result)-> pd.DataFrame:
+    def profit(self ,result : pd.DataFrame)-> pd.DataFrame:
         """_summary_
 
         Args:
@@ -178,5 +149,5 @@ class CumulativeTradeProfit(CalculatorProfit,Money):
         Returns:
             pd.DataFrame: _description_
         """
+        result['PriceEndOrder'] = self.price_end(result)
         return result.apply(self.cumulative_profit ,axis = 1 )
-    

@@ -1,8 +1,7 @@
 from numbers import Number
-import pandas as pd 
-import numpy as np
+import pandas as pd
 from Stratigy import Strategy
-from Calculator import unCumulative_Trade_profit,cumulative_trade_profit
+from Calculator import UnCumulativeTradeProfit,CumulativeTradeProfit
 
 
 
@@ -12,54 +11,45 @@ class  BackTest:
         .......et
     Parameters
     ----------
-    Cash 
+    Cash
     RatioEntry
     cp = cumulative profit
     """
     def __init__(self,
                  data : pd.DataFrame,data_small :  pd.DataFrame,
-                 strategy :type[Strategy],Cash : int = 1000 ,
-                 RatioEntry :int =1000 ,Fees : float = 0.001,
-                cp : bool = False ) -> None:
+                 strategy :type[Strategy] ,cash : int = 1000 ,
+                 ratio_entry :int = 1000 ,fees : float = 0.001 ,
+                 cp : bool = False ) -> None:
 
-        
         if not (isinstance(strategy, type) and issubclass(strategy, Strategy)):
             raise TypeError('`strategy` must be a Strategy sub-type')
         if not isinstance(data, pd.DataFrame):
             raise TypeError("`data` must be a pandas.DataFrame with columns")
         if not isinstance(data_small, pd.DataFrame):
             raise TypeError("`data` must be a pandas.DataFrame with columns")
-        if not isinstance(Cash, Number):
+        if not isinstance(cash, Number):
             raise TypeError('`Cash` must be a float value, percent of '
                             'entry order price')
-        
-        
         if cp:
-            self.CalTraded = cumulative_trade_profit(Cash ,RatioEntry ,Fees)
+            self.cal_traded = CumulativeTradeProfit(cash ,ratio_entry ,fees)
         else:
-            self.CalTraded = unCumulative_Trade_profit(Cash ,RatioEntry ,Fees)
-            
+            self.cal_traded = UnCumulativeTradeProfit(cash ,ratio_entry ,fees)
+        self.end_date = data.index[-1]
+        self.columns = data.columns
+        date = data.loc[data.Signal != 0 ].index[0]
 
-        self.data = data
-        self.data_small = data_small  
-        self.Strategy = strategy
-        self.endDate =self.data.index[-1]
-  
+        self.strategy = strategy(date ,data ,data_small)
+        self.strategy.init()
+        self.result = pd.DataFrame
 
-    def run(self):
-        
-        Strategy = self.Strategy(self.data_small,self.data.loc[self.data.Signal != 0 ].index[0])
-        Strategy.init()
-        Strategy.Data = self.data
-        if "Signal" in self.data.columns:
+
+    def run(self) :
+
+        if "Signal" in self.columns:
 
             #not Strategy.Data[ Strategy.Data.Signal != 0 ].empty
-            while not Strategy.Data[ Strategy.Data.Signal != 0 ].empty :
-
-                Strategy.next()
-                Strategy.trade()
-                Strategy.update()
-        self.result = self.CalTraded.profit(Strategy._result_orders)
-
-
-    
+            while not self.strategy.data[ self.strategy.data.Signal != 0 ].empty :
+                self.strategy.next()
+                self.strategy.trade()
+                self.strategy.update()
+        self.result = self.cal_traded.profit(self.strategy.result_orders)
