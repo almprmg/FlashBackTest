@@ -100,4 +100,5 @@ class Orders:
         self.date_end_order = date_end
         self._position =False
         self.data_orders.add_orders( self.__order)
-
+    def get_result(self):
+        return self.data_orders.to_dataframe()

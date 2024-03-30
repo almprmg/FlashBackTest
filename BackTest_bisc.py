@@ -52,4 +52,4 @@ class  BackTest:
                 self.strategy.next()
                 self.strategy.trade()
                 self.strategy.update()
-        self.result = self.cal_traded.profit(self.strategy.result_orders)
+        self.result = self.strategy.get_result() #self.cal_traded.profit()
