@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import pandas as pd
 
 class _unit:
@@ -17,8 +17,8 @@ class DataOrder:
     sl: float = None
     success: int = None
     date_end: pd.Timestamp = None
-    def getOrder(self) -> list:
-        ""
+    def get_order(self) -> list:
+        """Function ."""
         return  [self.id ,
                 self.type_ ,
                 self.date_starting ,
@@ -29,18 +29,20 @@ class DataOrder:
                 self.date_end ,
                 ]
 
+@dataclass
+class DataOrders:
+
+    __orders: list = field(default_factory=list)
+    def lenorders(self)-> int:
+        return len(self.__orders)
+    def add_orders(self, order : DataOrder ) -> None:
+        self.__orders.append(order)
+    def to_dataframe(self) -> pd.DataFrame :
+        return pd.DataFrame([t.__dict__ for t in self.__orders])
 
 class Orders:
     def __init__(self,date_start_order,data,data_low) -> None:
-        self.result_orders = pd.DataFrame({"IdOrder":[] ,
-                                            "Type":[] ,
-                                            "DateStart":[],
-                                            "Enter":[] ,
-                                            "tp":[]
-                                            ,"sl":[] ,
-                                            "Target":[],
-                                            "EndDate":[]
-                                            })
+        self.data_orders = DataOrders()
 
         self.__order : DataOrder
         self._type = None
@@ -87,7 +89,7 @@ class Orders:
     def _open_order(self ,type_order ,limit ,tp ,sl ):
         self._position = True
         self._type =type_order
-        self.__order =  DataOrder(str(type_order)+str(len( self.result_orders)),
+        self.__order =  DataOrder(str(type_order)+str( self.data_orders.lenorders()),
                      type_order,
                      self.date_start_order,limit
                      ,tp,
@@ -97,5 +99,5 @@ class Orders:
         self.__order.success,self.__order.date_end = goal , date_end
         self.date_end_order = date_end
         self._position =False
-        print(self.__order)
-        self.result_orders = pd.concat([self.result_orders,self.__order ] ,axis=0,ignore_index=True)
+        self.data_orders.add_orders( self.__order)
+

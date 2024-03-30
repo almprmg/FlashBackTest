@@ -49,7 +49,7 @@ class CalculatorProfit(metaclass=ABCMeta):
             pd.DataFrame: _description_
         """
         def fuc_wrapper(self,result):
-            result['different'] =  result['PriceEndOrder'] - result['Enter'] if result['Type'] == 1 else  result['Enter'] - result['PriceEndOrder']
+            result['different'] =  result['PriceEndOrder'] - result['price'] if result['type_'] == 1 else  result['price'] - result['PriceEndOrder']
             result = func(self,result)
             return result
         return fuc_wrapper
@@ -67,7 +67,7 @@ class CalculatorProfit(metaclass=ABCMeta):
         def fuc_wrapper(self,result):
             self.init_cash()
             result['FeesOpen'] = self.fees(self.amount)
-            result['Quantity'] =  self.amount / result['Enter']
+            result['Quantity'] =  self.amount / result['price']
             return  func(self,result)
         return fuc_wrapper
     @staticmethod
@@ -91,7 +91,7 @@ class CalculatorProfit(metaclass=ABCMeta):
     def price_end(result: pd.DataFrame =None ) -> list:
         """samry
         ."""
-        return [row["tp"] if row['Target'] != 0 else row["sl"] for _,row in result.iterrows()]
+        return [row["tp"] if row['success'] != 0 else row["sl"] for _,row in result.iterrows()]
 
     @abstractmethod
     def cumulative_profit(self,result)-> None:
@@ -118,7 +118,7 @@ class UnCumulativeTradeProfit(CalculatorProfit,Money):
     def cumulative_profit(self,result:pd.DataFrame) -> pd.DataFrame:
 
         result['CumProfit'] = result['ProfitTrade'].cumsum() +  self.cash
-        ep_result = result[["Enter","PriceEndOrder"]]
+        ep_result = result[["price","PriceEndOrder"]]
         result['PctProfit'] = ep_result.pct_change(axis="columns",periods=1)["PriceEndOrder"] * 100
         return result
     def profit(self,result: pd.DataFrame) -> pd.DataFrame:
@@ -137,7 +137,7 @@ class CumulativeTradeProfit(CalculatorProfit,Money):
     def cumulative_profit(self ,result:pd.DataFrame) -> pd.DataFrame:
         self.cash += result['ProfitTrade']
         result['CumProfit'] =self.cash
-        ep_result = result[["Enter" ,"PriceEndOrder"]]
+        ep_result = result[["price" ,"PriceEndOrder"]]
         result['PctProfit'] = ep_result.pct_change(periods=1)["PriceEndOrder"]*100
         return  result
     def profit(self ,result : pd.DataFrame)-> pd.DataFrame:
