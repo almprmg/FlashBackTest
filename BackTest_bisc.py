@@ -9,6 +9,7 @@ class initData():
         pass
     def add_column_signall(self,data):
         data["Signall"] = 0
+        data = self.exts_conditions(data)
 
 
     def lode_code(self):
@@ -26,7 +27,14 @@ class initData():
 
     def replace_datato_row(self,line_condition):
         return re.sub(r"\bself.data\b" ,"row" ,line_condition)
+    def exts_conditions(self,data):
+        code  = self.lode_code()
+        try:
+            data = data.apply(exec(self.find_if_condition_trade(code)))
+            data = data.apply(exec(self.find_elif_condition_trade(code)))
 
+        finally:
+            return data
 
 class  BackTest:
     """
