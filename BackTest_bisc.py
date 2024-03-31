@@ -2,7 +2,30 @@ from numbers import Number
 import pandas as pd
 from Stratigy import Strategy
 from Calculator import UnCumulativeTradeProfit,CumulativeTradeProfit
+import re
 
+class initData():
+    def __init__(self) -> None:
+        pass
+    def add_column_signall(self,data):
+        data["Signall"] = 0
+
+
+    def lode_code(self):
+        with open('main_tast.py') as f:
+            code = f.read()
+            f.close()
+        return code
+    def find_if_condition_trade(self,code):
+        line_condition = re.findall("if(.*)", code, re.M)
+        return "lambda row: 1 if " + self.replace_datato_row(line_condition) + "else 0"
+
+    def find_elif_condition_trade(self,code):
+        line_condition =  re.findall("elif(.*)", code, re.M)
+        return  "lambda row: 2 if " + self.replace_datato_row(line_condition) + "else 0"
+
+    def replace_datato_row(self,line_condition):
+        return re.sub(r"\bself.data\b" ,"row" ,line_condition)
 
 
 class  BackTest:
@@ -36,20 +59,22 @@ class  BackTest:
             self.cal_traded = UnCumulativeTradeProfit(cash ,ratio_entry ,fees)
         self.end_date = data.index[-1]
         self.columns = data.columns
-        date = data.loc[data.Signal != 0 ].index[0]
 
+        date = data.loc[data.Signal != 0 ].index[0]
         self.strategy = strategy(date ,data ,data_small)
         self.strategy.init()
+
         self.result = pd.DataFrame
 
 
     def run(self) :
 
-        if "Signal" in self.columns:
 
-            #not Strategy.Data[ Strategy.Data.Signal != 0 ].empty
+        if not "Signal" in self.columns:
+
+                #not Strategy.Data[ Strategy.Data.Signal != 0 ].empty
             while not self.strategy.data[ self.strategy.data.Signal != 0 ].empty :
-                self.strategy.next()
-                self.strategy.trade()
-                self.strategy.update()
+                    self.strategy.next()
+                    self.strategy.trade()
+                    self.strategy.update()
         self.result = self.strategy.get_result() #self.cal_traded.profit()
