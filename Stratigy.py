@@ -2,13 +2,31 @@ from BackTest_Smull import BestTestLow
 
 class Strategy(BestTestLow):
 
-    def update(self)-> None:
+    def update(self,)-> None:
 
-        self.data = self.data.iloc[self.data.index >  self.date_end_order,:]
-        data = self.data.loc[self.data.Signal != 0]
-        if self.date_end_order != self.data_low.index[-1] and len(data) !=0 :
-            self.date_start_order =data.index[0]
-            self.data_low = self.data_low.iloc[self.data_low.index >=  self.date_start_order,:]
+        self.data = self.__update_data(self.data)
+        self.data = self.data.loc[self.data.Signal != 0]
+        index_start_new_order = self.data.index[0]
+        if self.is_data_finsh() :
+            self.refresh_start_order(index_start_new_order)
+            self.refresh_data_low(index_start_new_order)
+    def update_no_signall(self,data)-> None:
+
+        data = self.__update_data(data)
+        if self.is_data_finsh() :
+            self.refresh_data_low(self.date_end_order)
+        return data
+    def __update_data(self,data):
+       return data.iloc[data.index > self.date_end_order,:]
+
+    def is_data_finsh(self,):
+        return self.date_end_order != self.data_low.index[-1] and len(self.data) !=0
+
+    def refresh_data_low(self,index):
+        self.data_low = self.data_low.iloc[self.data_low.index >=  index,:]
+
+    def refresh_data(self,data,index):
+        self.data = data.iloc[ : index,:]
 
     def buy(self, limit:float,tp: float,sl:float)-> None:
         if not self._position:

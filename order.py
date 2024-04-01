@@ -51,11 +51,11 @@ class Orders:
         self.tp = None
         self.sl = None
         self.limit =None
-        self.date_start_order = date_start_order
-        self.date_end_order   = None
         self._position =False
         self.data_low = data_low.loc[data_low.index >= self.date_start_order]
         self.data = data
+        self.date_start_order = date_start_order
+        self.date_end_order   = data.index[-1]
 
 
 
@@ -100,5 +100,9 @@ class Orders:
         self.date_end_order = date_end
         self._position =False
         self.data_orders.add_orders( self.__order)
+    def refresh_start_order(self,index) -> None:
+        self.date_start_order = index
+    def refresh_end_order(self,index) -> None:
+        self.date_start_order = index
     def get_result(self):
         return self.data_orders.to_dataframe()
