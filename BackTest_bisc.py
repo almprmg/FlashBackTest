@@ -32,8 +32,6 @@ class  BackTest:
             raise TypeError('`Cash` must be a float value, percent of '
                             'entry order price')
         self.__ishave_signal =  "Signal" in data.columns
-        self.__end_date = data.index[-1]
-        self.__starting_date = data.index[0]
         self.result = pd.DataFrame
 
 
@@ -42,7 +40,7 @@ class  BackTest:
         if self.__ishave_signal:
             date = data.loc[data.Signal != 0 ].index[0]
         else:
-            date = self.__starting_date
+            date = data.index[1]
             self.__data = data
         self.strategy = strategy(date ,data ,data_small)
 
@@ -70,13 +68,13 @@ class  BackTest:
             return
         self.normal_trade()
     def normal_trade(self):
-        while  self.strategy.is_data_finsh() :
             for index in  self.__data.index :
-                if index >= self.strategy.date_end_order:
+                if index >= self.strategy.date_end_order and self.strategy.is_data_finsh():
                     self.strategy.refresh_start_order(index)
                     self.strategy.refresh_data(self.__data,index)
                     self.strategy.next()
-                    if self.strategy.position:
+                    if self.strategy._position:
                         self.strategy.trade()
-                        self.__data = self.strategy.update_no_signall()
-                        continue
+                        self.strategy.update_no_signall(self.__data)
+            self.result =  self.cal_traded.profit(self.strategy.get_result())
+            

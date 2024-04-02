@@ -4,7 +4,7 @@ class Strategy(BestTestLow):
 
     def update(self,)-> None:
 
-        self.data = self.__update_data(self.data)
+        self.__update_data(self.data)
         self.data = self.data.loc[self.data.Signal != 0]
         index_start_new_order = self.data.index[0]
         if self.is_data_finsh() :
@@ -12,21 +12,21 @@ class Strategy(BestTestLow):
             self.refresh_data_low(index_start_new_order)
     def update_no_signall(self,data)-> None:
 
-        data = self.__update_data(data)
+        self.__update_data(data)
         if self.is_data_finsh() :
             self.refresh_data_low(self.date_end_order)
-        return data
-    def __update_data(self,data):
-       return data.iloc[data.index > self.date_end_order,:]
 
-    def is_data_finsh(self,):
+    def __update_data(self,data):
+       self.data  = data.loc[data.index > self.date_end_order,:]
+
+    def is_data_finsh(self):
         return self.date_end_order != self.data_low.index[-1] and len(self.data) !=0
 
     def refresh_data_low(self,index):
-        self.data_low = self.data_low.iloc[self.data_low.index >=  index,:]
+        self.data_low = self.data_low.iloc[self.data_low.index >  index,:]
 
     def refresh_data(self,data,index):
-        self.data = data.iloc[ : index,:]
+        self.data = data.loc[ : index,:]
 
     def buy(self, limit:float,tp: float,sl:float)-> None:
         if not self._position:

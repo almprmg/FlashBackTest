@@ -52,10 +52,11 @@ class Orders:
         self.sl = None
         self.limit =None
         self._position =False
+        self.date_start_order = date_start_order
+        self.date_end_order  =date_start_order
         self.data_low = data_low.loc[data_low.index >= self.date_start_order]
         self.data = data
-        self.date_start_order = date_start_order
-        self.date_end_order   = data.index[-1]
+
 
 
 
