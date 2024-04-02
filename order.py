@@ -5,6 +5,40 @@ class _unit:
     @staticmethod
     def swap(first,secund):
         return  secund ,first
+
+
+class hlepper_data:
+    def __init__(self ,
+                 data:pd.DataFrame ,
+                 data_low:pd.DataFrame ,
+                 ) -> None:
+        self.__data = data.copy()
+        self.data_low = data_low #.loc[data_low.index >= self.date_start_order]
+        self.data = data.head(1)
+    def __update_data(self,index_end_order):
+        self.__data = self.__data.loc[self.__data.index > index_end_order,:]
+
+        if self.is_data_finsh():
+            self.data   = self.__data.head(1)
+
+
+    def is_data_finsh(self):
+        return  len(self.__data) !=0
+    def refresh_data_low(self,index_start_order):
+        self.data_low = self.data_low.iloc[self.data_low.index >  index_start_order,:]
+
+    def refresh_data(self,last_index):
+        self.data = self.__data.loc[ : last_index,:]
+    def update(self,index_end_order)-> None:
+
+        self.__update_data(index_end_order)
+@dataclass
+class data:
+    Open: list = field(default_factory=list)
+    Close: list = field(default_factory=list)
+    High: list = field(default_factory=list)
+    Low: list = field(default_factory=list)
+    
 @dataclass
 class DataOrder:
     id: int = None
@@ -33,6 +67,7 @@ class DataOrder:
 class DataOrders:
 
     __orders: list = field(default_factory=list)
+
     def lenorders(self)-> int:
         return len(self.__orders)
     def add_orders(self, order : DataOrder ) -> None:
@@ -40,10 +75,12 @@ class DataOrders:
     def to_dataframe(self) -> pd.DataFrame :
         return pd.DataFrame([t.__dict__ for t in self.__orders])
 
-class Orders:
-    def __init__(self,date_start_order,data,data_low) -> None:
+class Orders(hlepper_data):
+    def __init__(self,date_start_order,
+                 data:pd.DataFrame ,
+                 data_low:pd.DataFrame ,) -> None:
+        super().__init__(data,data_low)
         self.data_orders = DataOrders()
-
         self.__order : DataOrder
         self._type = None
         self._date_tp = None
@@ -52,10 +89,10 @@ class Orders:
         self.sl = None
         self.limit =None
         self._position =False
-        self.date_start_order = date_start_order
+        self._date_start_order = date_start_order
         self.date_end_order  =date_start_order
-        self.data_low = data_low.loc[data_low.index >= self.date_start_order]
-        self.data = data
+
+
 
 
 
@@ -89,21 +126,31 @@ class Orders:
 
     def _open_order(self ,type_order ,limit ,tp ,sl ):
         self._position = True
+        self.refresh_start_order()
+        self.refresh_data_low(self._date_start_order)
         self._type =type_order
         self.__order =  DataOrder(str(type_order)+str( self.data_orders.lenorders()),
                      type_order,
-                     self.date_start_order,limit
+                     self._date_start_order,limit
                      ,tp,
                      sl,)
 
+
     def _close_order(self,goal:bool ,date_end : pd.Timestamp) -> None :
         self.__order.success,self.__order.date_end = goal , date_end
-        self.date_end_order = date_end
+        self.refresh_end_order(date_end)
+        self.update(date_end)
         self._position =False
         self.data_orders.add_orders( self.__order)
-    def refresh_start_order(self,index) -> None:
-        self.date_start_order = index
+
+
+
     def refresh_end_order(self,index) -> None:
-        self.date_start_order = index
+
+        self.date_end_order = index
+    def refresh_start_order(self) -> None:
+
+        self._date_start_order = self.data.index[-1]
+
     def get_result(self):
         return self.data_orders.to_dataframe()
