@@ -41,7 +41,7 @@ class  BackTest:
             date = data.loc[data.Signal != 0 ].index[0]
         else:
             date = data.index[1]
-            self.__data = data
+            self.__index = data.index
         self.strategy = strategy(date ,data ,data_small)
 
 
@@ -68,13 +68,11 @@ class  BackTest:
             return
         self.normal_trade()
     def normal_trade(self):
-            for index in  self.__data.index :
-                if index >= self.strategy.date_end_order and self.strategy.is_data_finsh():
-                    self.strategy.refresh_start_order(index)
-                    self.strategy.refresh_data(self.__data,index)
+            for index in  self.__index :
+                if index > self.strategy.date_end_order and self.strategy.is_data_finsh():
+                    self.strategy.refresh_data(index)
                     self.strategy.next()
                     if self.strategy._position:
                         self.strategy.trade()
-                        self.strategy.update_no_signall(self.__data)
             self.result =  self.cal_traded.profit(self.strategy.get_result())
             

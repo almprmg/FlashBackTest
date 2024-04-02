@@ -32,13 +32,7 @@ class hlepper_data:
     def update(self,index_end_order)-> None:
 
         self.__update_data(index_end_order)
-@dataclass
-class data:
-    Open: list = field(default_factory=list)
-    Close: list = field(default_factory=list)
-    High: list = field(default_factory=list)
-    Low: list = field(default_factory=list)
-    
+
 @dataclass
 class DataOrder:
     id: int = None
