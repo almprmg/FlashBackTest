@@ -35,8 +35,8 @@ class hlepper_data:
 
 @dataclass
 class DataOrder:
-    id: int = None
-    type_: int =None
+    type_order: int =None
+    position : bool = False
     date_starting: pd.Timestamp = None
     #symbol: str
     #quantity: float = None
@@ -47,8 +47,8 @@ class DataOrder:
     date_end: pd.Timestamp = None
     def get_order(self) -> list:
         """Function ."""
-        return  [self.id ,
-                self.type_ ,
+        return  [
+                self.type_order ,
                 self.date_starting ,
                 self.price ,
                 self.tp ,
@@ -57,17 +57,16 @@ class DataOrder:
                 self.date_end ,
                 ]
 
+
 @dataclass
 class DataOrders:
 
     __orders: list = field(default_factory=list)
 
-    def lenorders(self)-> int:
-        return len(self.__orders)
-    def add_orders(self, order : DataOrder ) -> None:
+    def add_order(self, order : DataOrder ) -> None:
         self.__orders.append(order)
     def to_dataframe(self) -> pd.DataFrame :
-        return pd.DataFrame([t.__dict__ for t in self.__orders])
+        return pd.DataFrame([order.__dict__ for order in self.__orders])
 
 class Orders(hlepper_data):
     def __init__(self,date_start_order,
@@ -75,14 +74,13 @@ class Orders(hlepper_data):
                  data_low:pd.DataFrame ,) -> None:
         super().__init__(data,data_low)
         self.data_orders = DataOrders()
-        self.__order : DataOrder
+        self.__order = DataOrder()
         self._type = None
         self._date_tp = None
         self._date_sl = None
         self.tp = None
         self.sl = None
         self.limit =None
-        self._position =False
         self._date_start_order = date_start_order
         self.date_end_order  =date_start_order
 
@@ -118,33 +116,49 @@ class Orders(hlepper_data):
         date_loss   =   self.data_low.loc[self.data_low.Low <= self.sl]
         self.check_empty(date_target ,date_loss )
 
-    def _open_order(self ,type_order ,limit ,tp ,sl ):
-        self._position = True
+    def _open_order(self ):
         self.refresh_start_order()
         self.refresh_data_low(self._date_start_order)
-        self._type =type_order
-        self.__order =  DataOrder(str(type_order)+str( self.data_orders.lenorders()),
-                     type_order,
-                     self._date_start_order,limit
-                     ,tp,
-                     sl,)
+        self.__new_order()
+
 
 
     def _close_order(self,goal:bool ,date_end : pd.Timestamp) -> None :
-        self.__order.success,self.__order.date_end = goal , date_end
+        self.__finish_position(goal,date_end)
         self.refresh_end_order(date_end)
         self.update(date_end)
-        self._position =False
-        self.data_orders.add_orders( self.__order)
 
 
 
     def refresh_end_order(self,index) -> None:
 
         self.date_end_order = index
+
     def refresh_start_order(self) -> None:
 
         self._date_start_order = self.data.index[-1]
 
-    def get_result(self):
+    def get_alorder(self):
+
         return self.data_orders.to_dataframe()
+
+    def is_position(self):
+
+        return self.__order.position
+
+    def __new_order(self):
+        self.__order =  DataOrder(
+                     type_order = self._type,
+                     position = True,
+                     date_starting = self._date_start_order,
+                     price = self.limit ,
+                     tp = self.tp,
+                     sl = self.sl,
+                     )
+    def __finish_position(self,goal , date_end):
+        self.__order.success  = goal
+        self.__order.date_end = date_end
+        self.__order.position = False
+        self.data_orders.add_order(self.__order)
+
+

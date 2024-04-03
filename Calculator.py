@@ -43,13 +43,13 @@ class CalculatorProfit(metaclass=ABCMeta):
         """_summary_
 
         Args:
-            func (_type_): _description_
+            func (_type_): _description_z
 
         Returns:
             pd.DataFrame: _description_
         """
         def fuc_wrapper(self,result):
-            result['different'] =  result['PriceEndOrder'] - result['price'] if result['type_'] == 1 else  result['price'] - result['PriceEndOrder']
+            result['different'] =  result['PriceEndOrder'] - result['price'] if result['type_order'] == 1 else  result['price'] - result['PriceEndOrder']
             result = func(self,result)
             return result
         return fuc_wrapper
