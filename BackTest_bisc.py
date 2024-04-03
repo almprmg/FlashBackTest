@@ -38,7 +38,8 @@ class  BackTest:
         self.chois_iscp(cash, ratio_entry, fees, cp)
 
         if self.__ishave_signal:
-            date = data.loc[data.Signal != 0 ].index[0]
+            data = data.loc[data.Signal != 0]
+            date = data.index[0]
         else:
             date = data.index[1]
             self.__index = data.index
@@ -60,11 +61,10 @@ class  BackTest:
         if self.__ishave_signal:
 
                 #not Strategy.Data[ Strategy.Data.Signal != 0 ].empty
-            while not self.strategy.data[ self.strategy.data.Signal != 0 ].empty :
+            while self.strategy.is_data_finsh() :
                     self.strategy.next()
                     self.strategy.trade()
-                    self.strategy.update()
-            self.result = self.strategy.get_result() #self.cal_traded.profit()
+            self.result = self.cal_traded.profit(self.strategy.get_alorder())
             return
         self.normal_trade()
     def normal_trade(self):
@@ -72,7 +72,7 @@ class  BackTest:
                 if index > self.strategy.date_end_order and self.strategy.is_data_finsh():
                     self.strategy.refresh_data(index)
                     self.strategy.next()
-                    if self.strategy._position:
+                    if self.strategy.is_position():
                         self.strategy.trade()
-            self.result =  self.cal_traded.profit(self.strategy.get_result())
+            self.result =  self.cal_traded.profit(self.strategy.get_alorder())
             
