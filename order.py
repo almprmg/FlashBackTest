@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
-import pandas as pd
+from pandas import DataFrame,Series
+from pandas import Timestamp , to_datetime
+
 
 class _unit:
     @staticmethod
@@ -9,8 +11,8 @@ class _unit:
 
 class hlepper_data:
     def __init__(self ,
-                 data:pd.DataFrame ,
-                 data_low:pd.DataFrame ,
+                 data: DataFrame ,
+                 data_low: DataFrame ,
                  ) -> None:
         self.__data = data.copy()
         self.data_low = data_low #.loc[data_low.index >= self.date_start_order]
@@ -37,14 +39,14 @@ class hlepper_data:
 class DataOrder:
     type_order: int =None
     position : bool = False
-    date_starting: pd.Timestamp = None
+    date_starting: Timestamp = None
     #symbol: str
     #quantity: float = None
     price: float = None
     tp: float = None
     sl: float = None
     success: int = None
-    date_end: pd.Timestamp = None
+    date_end: Timestamp = None
     def get_order(self) -> list:
         """Function ."""
         return  [
@@ -65,13 +67,13 @@ class DataOrders:
 
     def add_order(self, order : DataOrder ) -> None:
         self.__orders.append(order)
-    def to_dataframe(self) -> pd.DataFrame :
-        return pd.DataFrame([order.__dict__ for order in self.__orders])
+    def to_dataframe(self) -> DataFrame :
+        return DataFrame([order.__dict__ for order in self.__orders])
 
 class Orders(hlepper_data):
     def __init__(self,date_start_order,
-                 data:pd.DataFrame ,
-                 data_low:pd.DataFrame ,) -> None:
+                 data: DataFrame ,
+                 data_low: DataFrame ,) -> None:
         super().__init__(data,data_low)
         self.data_orders = DataOrders()
         self.__order = DataOrder()
@@ -83,10 +85,6 @@ class Orders(hlepper_data):
         self.limit =None
         self._date_start_order = date_start_order
         self.date_end_order  =date_start_order
-
-
-
-
 
 
     def _process_order(self):
@@ -107,14 +105,23 @@ class Orders(hlepper_data):
     def is_short(self): # is order short or long
         return not self.is_long()
 
-    def check_empty(self ,date_target , date_loss ):
-        self._date_tp = date_target.index[0] if  not date_target.empty else False
-        self._date_sl = date_loss.index[0] if not date_loss.empty  else False
+    def check_empty(self ,series_data):
+
+        return False if series_data.empty else series_data.index[-1]
+
+    def is_empty(self,date_target , date_loss ):
+    
+        self._date_tp = date_target.index[0] if self.check_empty(date_target) else self.check_empty(date_loss)
+        self._date_sl = date_loss.index[0] if self.check_empty(date_loss)  else self.check_empty(date_target)
+        return not (self._date_tp or self._date_sl)
 
     def date_finish_order(self):
         date_target =  self.data_low.loc[self.data_low.High >= self.tp]
         date_loss   =   self.data_low.loc[self.data_low.Low <= self.sl]
-        self.check_empty(date_target ,date_loss )
+        if (self.is_empty(date_target ,date_loss )):
+             self.__order.position = False
+
+
 
     def _open_order(self ):
         self.refresh_start_order()
@@ -123,10 +130,11 @@ class Orders(hlepper_data):
 
 
 
-    def _close_order(self,goal:bool ,date_end : pd.Timestamp) -> None :
+    def _close_order(self,goal:bool ,date_end : Timestamp) -> None :
         self.__finish_position(goal,date_end)
         self.refresh_end_order(date_end)
         self.update(date_end)
+        return self.is_position()
 
 
 
