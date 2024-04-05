@@ -1,4 +1,5 @@
 __pycache__/*.pyc
+.scannerwork/
 gitdata.py
 *.ipynb
 main_tast.py
