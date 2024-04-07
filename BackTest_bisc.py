@@ -3,8 +3,7 @@ import numpy as np
 import pandas as pd
 from Stratigy import Strategy
 from Calculator import UnCumulativeTradeProfit,CumulativeTradeProfit
-from backtesting import Backtest
-class  BackTest:
+class  FastBackTesting:
     """
     fastbacktesting a particular (parameterized) strategy
     on particular data.
@@ -60,7 +59,7 @@ class  BackTest:
         self.result = pd.DataFrame
 
 
-        self.chois_iscp(cash, ratio_entry, fees, cp)
+        self.choose_iscp(cash, ratio_entry, fees, cp)
 
         if self.__ishave_signal:
             data = data.loc[data.Signal != 0]
@@ -73,7 +72,9 @@ class  BackTest:
 
 
 
-    def chois_iscp(self, cash, ratio_entry, fees, cp):
+    def choose_iscp(self, cash, ratio_entry, fees, cp):
+        """Choose if you want to set the strategy with the cumulative profit or a fixed amount.
+        """
         if cp:
             self.cal_traded = CumulativeTradeProfit(cash ,ratio_entry ,fees)
         else:
@@ -82,21 +83,19 @@ class  BackTest:
 
     def run(self) :
 
-
+        """Run the backtest. Returns `int Return [%] strategy` with results and statistics.
+        """
         if self.__ishave_signal:
 
-                #not Strategy.Data[ Strategy.Data.Signal != 0 ].empty
             while self.strategy.is_data_finsh() :
-                    self.strategy.next()
-                    self.strategy.trade()
+                self.strategy.next()
+                self.strategy.trading()
             self.result = self.cal_traded.profit(self.strategy.get_alorder())
             return
-        self.normal_trade()
-    def normal_trade(self):
         for index in  self.__index :
             if index > self.strategy.date_end_order and self.strategy.is_data_finsh():
                 self.strategy.refresh_data(index)
                 self.strategy.next()
                 if self.strategy.is_position():
-                    self.strategy.trade()
+                    self.strategy.trading()
         self.result =  self.cal_traded.profit(self.strategy.get_alorder())
