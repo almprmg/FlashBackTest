@@ -37,7 +37,7 @@ class hlepper_data:
 
 @dataclass
 class DataOrder:
-    type_order: int =None
+    type_order: int = None
     position : bool = False
     date_starting: Timestamp = None
     #symbol: str
