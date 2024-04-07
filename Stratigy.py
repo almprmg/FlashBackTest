@@ -1,8 +1,8 @@
 
 from abc import ABCMeta,abstractmethod
-from BackTest_Smull import BestTestLow
+from BackTest_Smull import Trade
 
-class Strategy(BestTestLow,metaclass=ABCMeta):
+class Strategy(Trade,metaclass=ABCMeta):
     """
     A trading strategy base class. Extend this class and
     override methods
@@ -21,8 +21,7 @@ class Strategy(BestTestLow,metaclass=ABCMeta):
             self.limit =limit
             self.sl = sl
             self.tp =tp
-            self._type =1
-            self._open_order()
+            self._open_order(1)
     def sell(self, limit:float,tp: float,sl:float):
         """
         Place a new short order. For explanation of parameters, see `Order` and its properties.
@@ -33,8 +32,7 @@ class Strategy(BestTestLow,metaclass=ABCMeta):
             self.limit =limit
             self.sl = sl
             self.tp =tp
-            self._type =2
-            self._open_order()
+            self._open_order(2)
     @abstractmethod
     def next(self)-> None:
         """

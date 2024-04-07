@@ -37,7 +37,7 @@ class hlepper_data:
 
 @dataclass
 class DataOrder:
-    type_order: int = None
+    type_order: int = 0
     position : bool = False
     date_starting: Timestamp = None
     #symbol: str
@@ -77,9 +77,6 @@ class Orders(hlepper_data):
         super().__init__(data,data_low)
         self.data_orders = DataOrders()
         self.__order = DataOrder()
-        self._type = None
-        self._date_tp = None
-        self._date_sl = None
         self.tp = None
         self.sl = None
         self.limit =None
@@ -87,21 +84,8 @@ class Orders(hlepper_data):
         self.date_end_order  =date_start_order
 
 
-    def _process_order(self):
-        if self.is_long():
-            return self.long_order()
-        self.short_order()
-
-    def long_order(self):
-        self.date_finish_order()
-
-    def short_order(self):
-        self.tp,self.sl= _unit.swap(self.tp,self.sl)
-        self.date_finish_order()
-        self._date_tp,self._date_sl = _unit.swap(self._date_tp,self._date_sl)
-
     def is_long(self):
-        return self._type == 1
+        return self.__order.type_order == 1
     def is_short(self): # is order short or long
         return not self.is_long()
 
@@ -110,24 +94,17 @@ class Orders(hlepper_data):
         return False if series_data.empty else series_data.index[-1]
 
     def is_empty(self,date_target , date_loss ):
-    
-        self._date_tp = date_target.index[0] if self.check_empty(date_target) else self.check_empty(date_loss)
-        self._date_sl = date_loss.index[0] if self.check_empty(date_loss)  else self.check_empty(date_target)
-        return not (self._date_tp or self._date_sl)
 
-    def date_finish_order(self):
-        date_target =  self.data_low.loc[self.data_low.High >= self.tp]
-        date_loss   =   self.data_low.loc[self.data_low.Low <= self.sl]
-        if (self.is_empty(date_target ,date_loss )):
-             self.__order.position = False
+        return (date_target or date_loss)
 
 
 
-    def _open_order(self ):
+
+
+    def _open_order(self,type_order ):
         self.refresh_start_order()
         self.refresh_data_low(self._date_start_order)
-        self.__new_order()
-
+        self.__new_order(type_order)
 
 
     def _close_order(self,goal:bool ,date_end : Timestamp) -> None :
@@ -154,9 +131,9 @@ class Orders(hlepper_data):
 
         return self.__order.position
 
-    def __new_order(self):
+    def __new_order(self,type_order):
         self.__order =  DataOrder(
-                     type_order = self._type,
+                     type_order = type_order,
                      position = True,
                      date_starting = self._date_start_order,
                      price = self.limit ,
