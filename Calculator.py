@@ -1,43 +1,25 @@
 from abc import ABCMeta ,abstractmethod
 import pandas as pd
+from dataclasses import dataclass,field
+@dataclass
+class Wallet:
 
-class Money:
-    """_summary_
-    """
-    def __init__(self,cash,ratio_entry ,fees ) -> None:
-        self.cash =  cash
-        self.amount : float
-        self.ratio_entry = ratio_entry
-        self.retail = int
-        self.rate_fees =fees
+    cash : int =  field(default_factory= int)
+    ratio_entry : int = field(default_factory= int)
+    rate_fees : float = field(default_factory= float)
+    amount : int = field(default_factory= int)
+
+
 
     def init_cash(self):
         """init cash
         """
-        self.retail = 100 / self.ratio_entry
-        self.amount = self.cash /  self.retail
+        retail = 100 / self.ratio_entry
+        self.amount = self.cash /  retail
+    def fees(self,row) ->float:
 
-    def fees(self,row):
-        """rival fess
-
-        Args:
-            row (_type_): _description_
-
-        Returns:
-            flute: _description_
-        """
-        fees_ = row * self.rate_fees
-        return abs(fees_)
-class CalculatorProfit(metaclass=ABCMeta):
-    """
-    First discrete difference of element.
-        .......et
-    Parameters
-    ----------
-    Cash
-    RatioEntry
-    CP = cumulative profit
-    """
+        return abs(row * self.rate_fees)
+class InitDataTraded():
     @staticmethod
     def different(func) -> pd.DataFrame :
         """_summary_
@@ -56,87 +38,67 @@ class CalculatorProfit(metaclass=ABCMeta):
 
     @staticmethod
     def quantity_symbol(func) -> pd.DataFrame:
-        """_summary_
-
-        Args:
-            func (_type_): _description_
-
-        Returns:
-            pd.DataFrame: _description_
-        """
         def fuc_wrapper(self,result):
-            self.init_cash()
-            result['FeesOpen'] = self.fees(self.amount)
-            result['Quantity'] =  self.amount / result['price']
+            self.wallet.init_cash()
+            result['FeesOpen'] = self.wallet.fees(self.wallet.amount)
+            result['Quantity'] =  self.wallet.amount / result['price']
             return  func(self,result)
         return fuc_wrapper
     @staticmethod
 
     def profit_trade(func)-> pd.DataFrame:
-        """_summary_
 
-        Args:
-            func (_type_): _description_
-
-        Returns:
-            pd.DataFrame: _description_
-        """
         def fuc_wrapper(self,result):
             result['ProfitTrade'] = round(result['Quantity'] * result['different'],3)
-            result['FeesClose'] =  round(self.fees(result['ProfitTrade'] + self.amount),3)
+            result['FeesClose'] =  round(self.wallet.fees(result['ProfitTrade'] + self.wallet.amount),3)
             result['ProfitTrade']= result['ProfitTrade'] - result['FeesClose']
             return func(self,result)
         return fuc_wrapper
     @staticmethod
     def price_end(result: pd.DataFrame =None ) -> list:
-        """samry
-        ."""
         return [row["tp"] if row['success'] != 0 else row["sl"] for _,row in result.iterrows()]
 
+class CalcutatorPofit(metaclass=ABCMeta):
+    def __init__(self, cash, ratio_entry, fees) -> None:
+        self.wallet = Wallet( cash, ratio_entry, fees)
+
     @abstractmethod
-    def cumulative_profit(self,result)-> None:
+    def howto_win(self,result)-> None:
         """_summary_.
         """
+    @abstractmethod
+    def profit(self,result)-> None:
+        """profit.
 
-class UnCumulativeTradeProfit(CalculatorProfit,Money):
-    """There is no need to override 'price_end' it has the same
-        signature as the implementation in CalculatorProfit.
+        """
+class UnCumulativeTradeProfit(CalcutatorPofit):
 
-    Args:
-        CalculatorProfit (_type_): _description_
-        Money (_type_): _description_
-    Parameters
-    ----------
-    Cash
-    RatioEntry
-    CP = cumulative profit
-    """
 
-    @CalculatorProfit.different
-    @CalculatorProfit.quantity_symbol
-    @CalculatorProfit.profit_trade
-    def cumulative_profit(self,result:pd.DataFrame) -> pd.DataFrame:
+    @InitDataTraded.different
+    @InitDataTraded.quantity_symbol
+    @InitDataTraded.profit_trade
+    def howto_win(self,result:pd.DataFrame) -> pd.DataFrame:
 
-        result['CumProfit'] = result['ProfitTrade'].cumsum() +  self.cash
+        result['CumProfit'] = result['ProfitTrade'].cumsum() +  self.wallet.cash
         ep_result = result[["price","PriceEndOrder"]]
         result['PctProfit'] = ep_result.pct_change(axis="columns",periods=1)["PriceEndOrder"] * 100
         return result
     def profit(self,result: pd.DataFrame) -> pd.DataFrame:
         """_summary_
         """
-        result['PriceEndOrder'] = self.price_end(result)
-        return self.cumulative_profit(result)
+        result['PriceEndOrder'] = InitDataTraded.price_end(result)
+        return self.howto_win(result)
 
-class CumulativeTradeProfit(CalculatorProfit,Money):
+class CumulativeTradeProfit(CalcutatorPofit):
     """There is no need to override 'price_end' it has the same
         signature as the implementation in CalculatorProfit.
     """
-    @CalculatorProfit.different
-    @CalculatorProfit.quantity_symbol
-    @CalculatorProfit.profit_trade
-    def cumulative_profit(self ,result:pd.DataFrame) -> pd.DataFrame:
-        self.cash += result['ProfitTrade']
-        result['CumProfit'] =self.cash
+    @InitDataTraded.different
+    @InitDataTraded.quantity_symbol
+    @InitDataTraded.profit_trade
+    def howto_win(self ,result:pd.DataFrame) -> pd.DataFrame:
+        self.wallet.cash += result['ProfitTrade']
+        result['CumProfit'] =self.wallet.cash
         ep_result = result[["price" ,"PriceEndOrder"]]
         result['PctProfit'] = ep_result.pct_change(periods=1)["PriceEndOrder"]*100
         return  result
@@ -149,5 +111,5 @@ class CumulativeTradeProfit(CalculatorProfit,Money):
         Returns:
             pd.DataFrame: _description_
         """
-        result['PriceEndOrder'] = self.price_end(result)
-        return result.apply(self.cumulative_profit ,axis = 1 )
+        result['PriceEndOrder'] = InitDataTraded.price_end(result)
+        return result.apply(self.howto_win ,axis = 1 )
