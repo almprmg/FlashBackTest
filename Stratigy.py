@@ -6,8 +6,8 @@ class Strategy(Trade,metaclass=ABCMeta):
     """
     A trading strategy base class. Extend this class and
     override methods
-    `fastbacktesting.fastbacktesting.Strategy.init` and
-    `fastbacktesting.fastbacktesting.Strategy.next` to define
+    `FlashBackTesting.FlashBackTesting.Strategy.init` and
+    `FlashBackTesting.FlashBackTesting.Strategy.next` to define
     your own strategy.
     """
 
@@ -38,11 +38,11 @@ class Strategy(Trade,metaclass=ABCMeta):
         """
         Initialize the strategy.
         Override this method.
-        Declare indicators (with `fastbacktesting.fastbacktesting.Strategy.I`).
+        Declare indicators (with `FlashBackTesting.FlashBackTesting.Strategy.I`).
         Precompute what needs to be precomputed or can be precomputed
         in a vectorized fashion before the strategy starts.
 
-        If you extend composable strategies from `fastbacktesting.lib`,
+        If you extend composable strategies from `FlashBackTesting.lib`,
         make sure to call:
 
             super().init()
@@ -51,13 +51,13 @@ class Strategy(Trade,metaclass=ABCMeta):
     def init(self)-> None:
         """ 
         Main strategy runtime method, called as each new
-        `fastbacktesting.fastbacktesting.Strategy.data`
+        `FlashBackTesting.FlashBackTesting.Strategy.data`
         instance (row; full candlestick bar) becomes available.
         This is the main method where strategy decisions
-        upon data precomputed in `fastbacktesting.fastbacktesting.Strategy.init`
+        upon data precomputed in `FlashBackTesting.FlashBackTesting.Strategy.init`
         take place.
 
-        If you extend composable strategies from `fastbacktesting.lib`,
+        If you extend composable strategies from `FlashBackTesting.lib`,
         make sure to call:
 
             super().next()

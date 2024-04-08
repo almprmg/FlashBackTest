@@ -3,12 +3,6 @@ from pandas import DataFrame,Series
 from pandas import Timestamp , to_datetime
 
 
-class _unit:
-    @staticmethod
-    def swap(first,secund):
-        return  secund ,first
-
-
 class hlepper_data:
     def __init__(self ,
                  data: DataFrame ,
@@ -88,16 +82,6 @@ class Orders(hlepper_data):
         return self.__order.type_order == 1
     def is_short(self): # is order short or long
         return not self.is_long()
-
-    def check_empty(self ,series_data):
-
-        return False if series_data.empty else series_data.index[-1]
-
-    def is_empty(self,date_target , date_loss ):
-
-        return (date_target or date_loss)
-
-
 
 
 
