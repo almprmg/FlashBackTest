@@ -1,8 +1,8 @@
 **Project Documentation - README.md**
 
-# FlushBackTesting
+# FlashBackTesting
 
-[FlushBackTesting] Backtesting and Strategy Implementation
+[FlashBackTesting] Backtesting and Strategy Implementation
 
 ## Table of Contents
 
@@ -16,11 +16,11 @@
 
 ## Introduction
 
-The [FlushBackTesting] project provides a backtesting framework and strategy implementation for analyzing financial data. This documentation serves as a guide to understand the project,it enables it to show highly accurate results by using smaller frames and simulating the live test., its setup, and how to utilize its features effectively.
+The [FlashBackTesting] project provides a backtesting framework and strategy implementation for analyzing financial data. This documentation serves as a guide to understand the project,it enables it to show highly accurate results by using smaller frames and simulating the live test., its setup, and how to utilize its features effectively.
 
 ## Prerequisites
 
-Before getting started with [FlushBackTesting], ensure that you have the following prerequisites installed on your machine:
+Before getting started with [FlashBackTesting], ensure that you have the following prerequisites installed on your machine:
 
 - Python up(version 10.9.1)
 - pandas up(version last)
@@ -28,7 +28,7 @@ Before getting started with [FlushBackTesting], ensure that you have the followi
 
 ## Installation
 
-To install [FlushBackTesting], follow these steps:
+To install [FlashBackTesting], follow these steps:
 
 1. Clone the repository: `git clone https://github.com/almprmg/FastBackTest/.git`
 2. Change into the project directory: `cd FastBackTest`
@@ -36,12 +36,12 @@ To install [FlushBackTesting], follow these steps:
 
 ## Usage
 
-To use [FlushBackTesting], follow these guidelines:
+To use [FlashBackTesting], follow these guidelines:
 
 1. Import the necessary libraries:
 ```python
 import pandas as pd
-from BackTest_bisc import FlushBackTesting
+from BackTest_bisc import FlashBackTesting
 from Stratigy import Strategy
 ```
 
@@ -80,9 +80,9 @@ class myClass(Strategy):
             self.sell(limit=self.limit, tp=self.tp, sl=self.sl)
 ```
 
-4. Create an instance of the `FlushBackTesting` class and run the backtest:
+4. Create an instance of the `FlashBackTesting` class and run the backtest:
 ```python
-bt = FlushBackTesting(df1, data_low, myClass, ratio_entry=20, cp=True)
+bt = FlashBackTesting(df1, data_low, myClass, ratio_entry=20, cp=True)
 bt.run()
 ```
 
@@ -93,7 +93,7 @@ bt.result
 
 ## Contributing
 
-Contributions to [FlushBackTesting] are welcome! To contribute, please follow these steps:
+Contributions to [FlashBackTesting] are welcome! To contribute, please follow these steps:
 
 1. Fork the repository.
 2. Create a new branch for your feature or bug fix.
@@ -115,6 +115,6 @@ Contributions to [FlushBackTesting] are welcome! To contribute, please follow th
 For any questions or feedback, please contact:
 
 - [Hareth AL-Maqtari]: [Email****]
-- [FlushBackTesting] GitHub Issues: [Link to project's GitHub Issues]
+- [FlashBackTesting] GitHub Issues: [Link to project's GitHub Issues]
 
 ---
