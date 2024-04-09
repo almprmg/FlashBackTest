@@ -22,34 +22,35 @@ class hlepper_data:
         self.__data = data.copy()
         self.data_low = data_low #.loc[data_low.index >= self.date_start_order]
         self.data = data.head(1)
+
+    @property
+    def is_data_finish(self) -> bool:
+        return  len(self.__data) !=0
+
     def __update_data(self,index_end_order) -> None:
         self.__data = self.__data.loc[self.__data.index > index_end_order,:]
 
-        if self.is_data_finsh():
+        if self.is_data_finish:
             self.data   = self.__data.head(1)
-
-
-    def is_data_finsh(self) -> bool:
-        return  len(self.__data) !=0
-    def refresh_data_low(self,index_start_order) ->DataFrame:
+    def refresh_data_low(self,index_start_order) -> None:
         self.data_low = self.data_low.iloc[self.data_low.index >  index_start_order,:]
 
-    def refresh_data(self,last_index)-> DataFrame:
+    def refresh_data(self,last_index)-> None:
         self.data = self.__data.loc[ : last_index,:]
-    def update(self,index_end_order)-> None:
 
+    def update(self,index_end_order)-> None:
         self.__update_data(index_end_order)
 
 @dataclass
 class DataOrder:
     type_order: int = 0
     position : bool = False
-    date_starting: Timestamp = None
-    price: float = None
-    tp: float = None
-    sl: float = None
-    success: int = None
-    date_end: Timestamp = None
+    date_starting: Timestamp = field(default=None)
+    price: float = field(default=None)
+    tp: float = field(default=None)
+    sl: float = field(default=None)
+    success: int = field(default=None)
+    date_end: Timestamp = field(default=None)
     def get_order(self) -> list:
         """Function ."""
         return  [
@@ -70,6 +71,7 @@ class ClosedOrders:
 
     def add_order(self, order : DataOrder ) -> None:
         self.__orders.append(order)
+
     def to_dataframe(self) -> DataFrame :
         return DataFrame([order.__dict__ for order in self.__orders])
 
@@ -86,43 +88,28 @@ class Orders(hlepper_data):
         self._date_start_order = date_start_order
         self.date_end_order  =date_start_order
 
-
+    @property
     def is_long(self):
         return self.__order.type_order == 1
+    @property
     def is_short(self):
-        return not self.is_long()
+        return not self.is_long
 
 
+    @property
+    def get_alorder(self) ->DataFrame:
 
-    def _open_order(self,type_order ):
-        self.refresh_start_order()
-        self.refresh_data_low(self._date_start_order)
-        self.__new_order(type_order)
+        return self.data_orders.to_dataframe()
+    @property
+    def is_position(self) -> bool:
 
-
-    def _close_order(self,goal:bool ,date_end : Timestamp) -> None :
-        self.__finish_position(goal,date_end)
-        self.refresh_end_order(date_end)
-        self.update(date_end)
-        return self.is_position()
-
-
-
+        return self.__order.position
     def refresh_end_order(self,index) -> None:
 
         self.date_end_order = index
 
     def refresh_start_order(self) -> None:
-
         self._date_start_order = self.data.index[-1]
-
-    def get_alorder(self) ->DataFrame:
-
-        return self.data_orders.to_dataframe()
-
-    def is_position(self) -> bool:
-
-        return self.__order.position
 
     def __new_order(self,type_order) -> None:
         self.__order =  DataOrder(
@@ -139,15 +126,29 @@ class Orders(hlepper_data):
         self.__order.position = False
         self.data_orders.add_order(self.__order)
 
+    def _open_order(self,type_order ):
+        self.refresh_start_order()
+        self.refresh_data_low(self._date_start_order)
+        self.__new_order(type_order)
+
+
+    def _close_order(self,goal:bool ,date_end : Timestamp) -> None :
+        self.__finish_position(goal,date_end)
+        self.refresh_end_order(date_end)
+        self.update(date_end)
+        return self.is_position
+
+
+
+
 class Trade(Orders):
 
     def trading(self) -> None:
-        if self.is_position():
+        if self.is_position:
             gols ,date_end = self.date_finish_order()
             self._close_order(gols ,date_end )
     def trade_order(self) -> tuple:
-        date_target =  self.data_low.loc[self.data_low.High >= self.tp]
-        date_loss   =   self.data_low.loc[self.data_low.Low <= self.sl]
+        date_target , date_loss = self.long_order() if self.is_long else self.short_order()
         date_tp = date_target.index[0] if check_empty(date_target) else check_empty(date_loss)
         date_sl = date_loss.index[0] if check_empty(date_loss)  else check_empty(date_target)
         return date_tp ,date_sl
@@ -158,22 +159,25 @@ class Trade(Orders):
         return not self.is_win(date_tp,date_sl)
 
     def date_finish_order(self)-> list:
-        date_tp,date_sl = self.long_order() if self.is_long() else self.short_order()
+        date_tp,date_sl = self.trade_order()
         if (is_empty(date_tp,date_sl)) :
             return [1,date_tp] if self.is_win(date_tp,date_sl) else [0,date_sl]
         return [None,None]
     def long_order(self) -> tuple:
-        return self.trade_order()
+        date_target =  self.data_low.loc[self.data_low.High >= self.tp]
+        date_loss   =   self.data_low.loc[self.data_low.Low <= self.sl]
+        return date_target , date_loss
     def short_order(self) -> tuple:
-        self.tp,self.sl= swap(self.tp,self.sl)
-        date_tp,date_sl= self.trade_order()
-        return swap(date_tp,date_sl)
+        date_target =  self.data_low.loc[self.data_low.Low <= self.tp]
+        date_loss   =   self.data_low.loc[self.data_low.High >= self.sl]
+        return date_target , date_loss
 
 
 
 
 class Strategy(Trade,metaclass=ABCMeta):
     """
+    This code and  comment is inspired by the backtesting library: [https://github.com/kernc/backtesting.py.git]
     A trading strategy base class. Extend this class and
     override methods
     `FlashBackTesting.FlashBackTesting.Strategy.init` and
@@ -187,7 +191,7 @@ class Strategy(Trade,metaclass=ABCMeta):
 
         See also `Strategy.sell()`.
         """
-        if not self.is_position():
+        if not self.is_position:
             self.limit =limit
             self.sl = sl
             self.tp =tp
@@ -198,7 +202,7 @@ class Strategy(Trade,metaclass=ABCMeta):
 
         See also `Strategy.buy()`.
         """
-        if not self.is_position():
+        if not self.is_position:
             self.limit =limit
             self.sl = sl
             self.tp =tp
@@ -233,11 +237,13 @@ class Strategy(Trade,metaclass=ABCMeta):
             super().next()
         """
 class  FlashBackTesting:
-    """
+    """"
+    This code and comment  is inspired by the backtesting library: [https://github.com/kernc/backtesting.py.git]
+    
     FlashBackTesting a particular (parameterized) strategy
     on particular data.
 
-    Upon initialization, call method 
+    Upon initialization, call method
     `FlashBackTesting.FlashBackTesting.BackTest.run` to run a backtest
     instance
     """
@@ -272,21 +278,9 @@ class  FlashBackTesting:
             except ValueError:
                 pass
 
-        if 'Volume' not in data:
-            data['Volume'] = np.nan
-
-        if len(data) == 0:
-            raise ValueError('OHLC `data` is empty')
-        if len(data.columns.intersection({'Open', 'High', 'Low', 'Close', 'Volume'})) != 5:
-            raise ValueError("`data` must be a pandas.DataFrame with columns "
-                             "'Open', 'High', 'Low', 'Close', and (optionally) 'Volume'")
-        if data[['Open', 'High', 'Low', 'Close']].isnull().values.any():
-            raise ValueError('Some OHLC values are missing (NaN). '
-                             'Please strip those lines with `df.dropna()` or '
-                             'fill them in with `df.interpolate()` or whatever.')
         self.__ishave_signal =  "Signal" in data.columns
         self.result : DataFrame
-        self.cal_traded = self.choose_iscp(cash, ratio_entry, fees, cp)
+        self.cal_traded :CumulativeTradeProfit = self.choose_iscp(cash, ratio_entry, fees, cp)
 
         if self.__ishave_signal:
             data = data.loc[data.Signal != 0]
@@ -314,15 +308,15 @@ class  FlashBackTesting:
         """
         if self.__ishave_signal:
 
-            while self.strategy.is_data_finsh() :
+            while self.strategy.is_data_finish:
                 self.strategy.next()
                 self.strategy.trading()
-            self.result = self.cal_traded.profit(self.strategy.get_alorder())
+            self.result = self.cal_traded.profit(self.strategy.get_alorder)
             return
         for index in  self.__index :
-            if index > self.strategy.date_end_order and self.strategy.is_data_finsh():
+            if index > self.strategy.date_end_order and self.strategy.is_data_finish:
                 self.strategy.refresh_data(index)
                 self.strategy.next()
-                if self.strategy.is_position():
+                if self.strategy.is_position:
                     self.strategy.trading()
-        self.result =  self.cal_traded.profit(self.strategy.get_alorder())
+        self.result =  self.cal_traded.profit(self.strategy.get_alorder)
