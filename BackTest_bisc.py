@@ -8,7 +8,7 @@ from pandas import to_datetime
 from pandas import DatetimeIndex
 from pandas import Timestamp
 from Calculator import UnCumulativeTradeProfit,CumulativeTradeProfit
-from _util import swap , is_empty,check_empty
+from _util import is_empty,check_empty
 
 
 
@@ -278,6 +278,18 @@ class  FlashBackTesting:
             except ValueError:
                 pass
 
+        if 'Volume' not in data:
+            data['Volume'] = np.nan
+
+        if len(data) == 0:
+            raise ValueError('OHLC `data` is empty')
+        if len(data.columns.intersection({'Open', 'High', 'Low', 'Close', 'Volume'})) != 5:
+            raise ValueError("`data` must be a pandas.DataFrame with columns "
+                             "'Open', 'High', 'Low', 'Close', and (optionally) 'Volume'")
+        if data[['Open', 'High', 'Low', 'Close']].isnull().values.any():
+            raise ValueError('Some OHLC values are missing (NaN). '
+                             'Please strip those lines with `df.dropna()` or '
+                             'fill them in with `df.interpolate()` or whatever.')
         self.__ishave_signal =  "Signal" in data.columns
         self.result : DataFrame
         self.cal_traded :CumulativeTradeProfit = self.choose_iscp(cash, ratio_entry, fees, cp)
@@ -288,6 +300,7 @@ class  FlashBackTesting:
         else:
             date = data.index[1]
             self.__index = data.index
+            
         self.strategy = strategy(date ,data ,data_small)
 
 
