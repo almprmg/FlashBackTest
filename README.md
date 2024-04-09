@@ -22,9 +22,10 @@ The [FlashBackTesting] project provides a backtesting framework and strategy imp
 
 Before getting started with [FlashBackTesting], ensure that you have the following prerequisites installed on your machine:
 
-- Python up(version 10.9.1)
-- pandas up(version last)
-- ...
+- Python (version >=  10.9.1)
+- pandas (version >= '1.5.3')
+- numpy (version >= 1.23.5')
+
 
 ## Installation
 
@@ -32,7 +33,6 @@ To install [FlashBackTesting], follow these steps:
 
 1. Clone the repository: `git clone https://github.com/almprmg/FastBackTest/.git`
 2. Change into the project directory: `cd FastBackTest`
-3. Install the required dependencies: `pip install -r requirements.txt`
 
 ## Usage
 
@@ -108,7 +108,7 @@ Contributions to [FlashBackTesting] are welcome! To contribute, please follow th
 3. Detailed results
 4. Accuracy in results
 ## License
-[MIT License](LICENSE)
+[(AGPL-3.0 License](LICENSE)
 
 ## Contact
 
