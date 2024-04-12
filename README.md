@@ -114,7 +114,7 @@ Contributions to [FlashBackTesting] are welcome! To contribute, please follow th
 
 For any questions or feedback, please contact:
 
-- [Hareth AL-Maqtari]: [Email****]
-- [FlashBackTesting] GitHub Issues: [Link to project's GitHub Issues]
+- [Hareth AL-Maqtari]: [uuyyhh9009@gmail.com]
+
 
 ---
