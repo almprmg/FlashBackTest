@@ -10,7 +10,7 @@ from pandas import Timestamp
 from Calculator import UnCumulativeTradeProfit,CumulativeTradeProfit
 from _util import is_empty,check_empty
 
-
+from backtesting import backtesting
 
 
 
@@ -25,24 +25,30 @@ class hlepper_data:
 
     @property
     def is_data_finish(self) -> bool:
+        """True if the data is length = 0 """
         return  len(self.__data) !=0
 
-    def __update_data(self,index_end_order) -> None:
+    def __update_data(self,index_end_order : Timestamp ) -> None:
+        """ update data OCHL from last order closed to end data."""
         self.__data = self.__data.loc[self.__data.index > index_end_order,:]
+        self.data_dump()
 
+    def data_dump(self) -> None :
         if self.is_data_finish:
             self.data   = self.__data.head(1)
-    def refresh_data_low(self,index_start_order) -> None:
+    def refresh_data_low(self,index_start_order : Timestamp) -> None:
+        """remove data OCHL after start time order opening start for start trade."""
         self.data_low = self.data_low.iloc[self.data_low.index >  index_start_order,:]
 
     def refresh_data(self,last_index)-> None:
+        """append last row to data trade."""
         self.data = self.__data.loc[ : last_index,:]
 
     def update(self,index_end_order)-> None:
         self.__update_data(index_end_order)
 
 @dataclass
-class DataOrder:
+class OrderInfo:
     type_order: int = 0
     position : bool = False
     date_starting: Timestamp = field(default=None)
@@ -51,25 +57,16 @@ class DataOrder:
     sl: float = field(default=None)
     success: int = field(default=None)
     date_end: Timestamp = field(default=None)
-    def get_order(self) -> list:
-        """Function ."""
-        return  [
-                self.type_order ,
-                self.date_starting ,
-                self.price ,
-                self.tp ,
-                self.sl ,
-                self.success ,
-                self.date_end ,
-                ]
+
 
 
 @dataclass
 class ClosedOrders:
 
-    __orders: list = field(default_factory=list)
+    __orders: list[OrderInfo] = field(default_factory=list)
 
-    def add_order(self, order : DataOrder ) -> None:
+    def add_order(self, order : OrderInfo ) -> None:
+        """add info order closed to list orders."""
         self.__orders.append(order)
 
     def to_dataframe(self) -> DataFrame :
@@ -81,7 +78,7 @@ class Orders(hlepper_data):
                  data_low: DataFrame ,) -> None:
         super().__init__(data,data_low)
         self.data_orders = ClosedOrders()
-        self.__order = DataOrder()
+        self.__order = OrderInfo()
         self.tp = None
         self.sl = None
         self.limit =None
@@ -90,29 +87,32 @@ class Orders(hlepper_data):
 
     @property
     def is_long(self):
+        "True if the type order is long (type order  is 1). "
         return self.__order.type_order == 1
     @property
     def is_short(self):
+        "True if the type order is short ( not type order  is long). "
         return not self.is_long
 
 
     @property
     def get_alorder(self) ->DataFrame:
-
+        """Dataframe of orders (see orders) withing empty data """
         return self.data_orders.to_dataframe()
     @property
     def is_position(self) -> bool:
-
+        """Instance of `backtesting.strategy.Position`."""
         return self.__order.position
     def refresh_end_order(self,index) -> None:
-
+        """time end last order close for update data from it"""
         self.date_end_order = index
 
     def refresh_start_order(self) -> None:
+        """time start last order opened, for update data from it."""
         self._date_start_order = self.data.index[-1]
 
     def __new_order(self,type_order) -> None:
-        self.__order =  DataOrder(
+        self.__order =  OrderInfo(
                      type_order = type_order,
                      position = True,
                      date_starting = self._date_start_order,
@@ -142,8 +142,9 @@ class Orders(hlepper_data):
 
 
 class Trade(Orders):
-
-    def trading(self) -> None:
+    """when is order opened ,is start back taste """
+    def trade(self) -> None:
+        """start finding result order"""
         if self.is_position:
             gols ,date_end = self.date_finish_order()
             self._close_order(gols ,date_end )
@@ -323,7 +324,7 @@ class  FlashBackTesting:
 
             while self.strategy.is_data_finish:
                 self.strategy.next()
-                self.strategy.trading()
+                self.strategy.trade()
             self.result = self.cal_traded.profit(self.strategy.get_alorder)
             return
         for index in  self.__index :
@@ -331,5 +332,5 @@ class  FlashBackTesting:
                 self.strategy.refresh_data(index)
                 self.strategy.next()
                 if self.strategy.is_position:
-                    self.strategy.trading()
+                    self.strategy.trade()
         self.result =  self.cal_traded.profit(self.strategy.get_alorder)
