@@ -1,5 +1,4 @@
-from abc import ABCMeta ,abstractmethod
-from time import sleep
+
 import pandas as pd
 from dataclasses import dataclass,field
 from _util import adding_threezero
@@ -8,114 +7,63 @@ class Wallet:
 
     cash : int =  field(default_factory= int)
     ratio_entry : int = field(default_factory= int)
-    rate_fees : float = field(default_factory= float)
-    amount : int = field(default_factory= int)
+
+
     def __post_init__(self):
         self.cash = adding_threezero(self.cash)
 
-
-    def init_cash(self):
+    @property
+    def amount(self):
         retail = 100 / self.ratio_entry
-        self.amount = self.cash /  retail
-
-    def fees(self,row) ->int:
-
-        return int(abs(row * self.rate_fees))
-class InitDataTraded():
+        return self.cash /  retail
 
 
-    @staticmethod
-    def quantity_symbol(func) -> pd.DataFrame:
-        def fuc_wrapper(self,result):
-            self.wallet.init_cash()
-            result['FeesOpen'] = self.wallet.fees(self.wallet.amount)
-            result['Quantity'] =  self.wallet.amount / result['price']
-            return  func(self,result)
-        return fuc_wrapper
-    @staticmethod
-    def profit_trade(func)-> pd.DataFrame:
 
-        def fuc_wrapper(self,result):
-            result['ProfitTrade'] = int(result['Quantity'] * result['different'])
-            result['FeesClose'] =   self.wallet.fees(result['ProfitTrade'] + self.wallet.amount)
-            result['ProfitTrade']= result['ProfitTrade'] - result['FeesClose']
-            return func(self,result)
-        return fuc_wrapper
-    @staticmethod
-    def price_end(order: pd.DataFrame  ) -> list:
 
-        return [row["tp"] if row["success"] != 0 else row["sl"] for _,row in order.iterrows()]
-    
-    @staticmethod
-    def different(order: pd.DataFrame) -> list:
-        return [row['PriceEndOrder'] - row['price'] if row['type_order'] == 1 else  row['price'] - row['PriceEndOrder'] for _,row in order.iterrows()]
+class CalcutatorPofit():
+    def __init__(self, cash, ratio_entry, rate_fees,cp) -> None:
+        self.wallet = Wallet( cash, ratio_entry)
+        self.rate_fees : float = rate_fees
+        self.__cp = cp
+    def fees(self,amount:int | pd.Series) -> int | pd.Series:
+        return self.rate_fees * amount
 
-class CalcutatorPofit(metaclass=ABCMeta):
-    def __init__(self, cash, ratio_entry, fees) -> None:
-        self.wallet = Wallet( cash, ratio_entry, fees)
+    def quantity(self,enter_price :float | pd.Series) -> float | pd.Series:
+        return self.wallet.amount / enter_price
 
-    @abstractmethod
-    def howto_win(self,result)-> None:
-        """_summary_.
-        """
-    @abstractmethod
-    def profit(self,result)-> None:
-        """profit.
+    def pnl(self,pct_cheng: float | pd.Series) -> float | pd.Series :
+        return self.wallet.amount * pct_cheng
 
-        """
-    def fixed(self,result):
+    def fixed_result(self,result:pd.DataFrame):
+        result["CumProfit"] -= (result["FeesClose"] + result["FeesOpen"])
+        result.drop(columns=["FeesClose","FeesOpen"],inplace=True)
         result["CumProfit"] /=1000
-        result["FeesClose"] /=1000
-        result["FeesOpen"] /=1000
-        result["ProfitTrade"] /=1000
+        result["PnL"] /=1000
         result["Quantity"] /=1000
         return result
-
-class UnCumulativeTradeProfit(CalcutatorPofit):
-
-
-
-
-    @InitDataTraded.quantity_symbol
-    @InitDataTraded.profit_trade
-    def howto_win(self,result:pd.DataFrame) -> pd.DataFrame:
-
-        result['CumProfit'] = result['ProfitTrade'].cumsum() +  self.wallet.cash
-        ep_result = result[["price","PriceEndOrder"]]
-        result['PctProfit'] = ep_result.pct_change(axis="columns",periods=1)["PriceEndOrder"] * 100
+    def unCumulative(self,result:pd.DataFrame) -> pd.DataFrame:
+        result["FeesOpen"] = self.fees(self.wallet.amount)
+        result["Quantity"] = self.quantity( result.enter_price)
+        result['PnL'] = self.pnl(result['pct'])
+        result['FeesClose'] = self.fees(result['PnL']+self.wallet.amount)
+        result['CumProfit'] = result['PnL'].cumsum() + self.wallet.cash
         return result
 
-    def profit(self,result: pd.DataFrame) -> pd.DataFrame:
-        """_summary_
+    def cumulative(self ,result:pd.DataFrame) -> pd.DataFrame:
+        """There is no need to override 'price_end' it has the same
+            signature as the implementation in CalculatorProfit.
         """
-  
-        result["PriceEndOrder"] = InitDataTraded.price_end(result)
-        result['different'] =   InitDataTraded.different(result)
-        return self.fixed(self.howto_win(result))
-
-class CumulativeTradeProfit(CalcutatorPofit):
-    """There is no need to override 'price_end' it has the same
-        signature as the implementation in CalculatorProfit.
-    """
-    InitData =InitDataTraded
-    @InitData.quantity_symbol
-    @InitData.profit_trade
-    def howto_win(self ,result:pd.DataFrame) -> pd.DataFrame:
-        self.wallet.cash += result['ProfitTrade']
+        result["FeesOpen"] = self.fees(self.wallet.amount)
+        result["Quantity"] = self.quantity( result.enter_price)
+        result['PnL'] = self.pnl(result['pct'])
+        result['FeesClose'] = self.fees(result['PnL']+self.wallet.amount)
+        self.wallet.cash += result['PnL']
         result['CumProfit'] = self.wallet.cash
-        ep_result = result[["price" ,"PriceEndOrder"]]
-        result['PctProfit'] = ep_result.pct_change(periods=1)["PriceEndOrder"] * 100
-        return  result
+        return result
 
-    def profit(self ,result : pd.DataFrame)-> pd.DataFrame:
-        """_summary_
+    def profit(self,result:pd.DataFrame)-> pd.DataFrame:
+        result =  result.apply(self.cumulative ,axis = 1) if  self.__cp else (self.unCumulative(result))
+        return  self.fixed_result(result)
 
-        Args:
-            result (_type_): _description_
 
-        Returns:
-            pd.DataFrame: _description_
-        """
-        result['PriceEndOrder'] = InitDataTraded.price_end(result)
-        result['different'] =   InitDataTraded.different(result)
-        return  self.fixed(result.apply(self.howto_win ,axis = 1 ))
+
