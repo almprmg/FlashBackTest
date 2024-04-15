@@ -26,7 +26,6 @@ class CalcutatorPofit():
         self.wallet = Wallet( cash, ratio_entry)
         self.rate_fees : float = rate_fees
         self.__cp = cp
-        self._trades : pd.DataFrame
     def fees(self,amount:int | pd.Series) -> int | pd.Series:
         return self.rate_fees * amount
 
@@ -63,12 +62,12 @@ class CalcutatorPofit():
         result['CumProfit'] = self.wallet.cash
         return result
 
-    def profit(self,result:pd.DataFrame)-> pd.DataFrame:
-        result =  result.apply(self.cumulative ,axis = 1) if  self.__cp else (self.unCumulative(result))
-        return self.fixed_result(result)
-    def finaly_rerurn(self,result,ohlc_data):
+    def profit(self,trade:pd.DataFrame)-> pd.DataFrame:
+        trade =  trade.apply(self.cumulative ,axis = 1) if  self.__cp else (self.unCumulative(trade))
+        return self.fixed_result(trade)
+    def finaly_result(self,result_trade,ohlc_data):
 
-        return compute_stats(self.profit(result),ohlc_data)
+        return compute_stats(self.profit(result_trade),ohlc_data)
 
 
 
