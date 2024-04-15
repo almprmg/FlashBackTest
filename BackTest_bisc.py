@@ -10,7 +10,6 @@ from pandas import Timestamp
 from Calculator import CalcutatorPofit
 from _util import is_empty,check_empty
 
-from backtesting import backtesting
 
 
 
@@ -326,7 +325,7 @@ class  FlashBackTesting:
         self.__ishave_signal =  "Signal" in data.columns
         self.result : DataFrame
         self.calculator_traded = CalcutatorPofit(cash, ratio_entry, fees, cp)
-
+        self.__data = data.copy(deep=False)
         if self.__ishave_signal:
             data = data.loc[data.Signal != 0]
             date = data.index[0]
@@ -336,27 +335,46 @@ class  FlashBackTesting:
 
         self.strategy = strategy(date ,data ,data_small)
 
-
-
-
-
-
-
     def run(self) -> None:
 
-        """Run the backtest. Returns `int Return [%] strategy` with results and statistics.
+        """
+        Run the backtest. Returns `pd.Series` with results and statistics.
+        
+        Keyword arguments are interpreted as strategy parameters.
+
+            >>> Backtest(AGLDUSDT,AGLDUSDT_Low_frame, Rsi).run()
+            Start                    2022-08-26 18:00:00
+            End                      2023-08-26 17:00:00
+            Duration                   364 days 23:00:00
+            Equity Final [$]                  782.198334
+            Equity Peak [$]                  1013.011602
+            Return [%]                        -22.463471
+            Buy & Hold Return [%]              38.636364
+            Max. Drawdown [%]                 -25.033789
+            # Trades                                  71
+            Win Rate [%]                       50.704225
+            Best Trade [%]                     15.873016
+            Worst Trade [%]                   -27.142857
+            Avg. Trade [%]                     -2.049075
+            Max. Trade Duration         27 days 17:00:00
+            Avg. Trade Duration          2 days 03:00:00
+            Profit Factor                       0.624392
+            Expectancy [%]                     -1.647243
+            SQN                                -1.609426
+            _trades                            Size  ...
+            dtype: obj
         """
         if self.__ishave_signal:
 
             while self.strategy.is_data_finish:
                 self.strategy.next()
                 self.strategy.trade()
-            self.result = self.calculator_traded.profit(self.strategy.get_alorder)
-            return
-        for index in  self.__index :
-            if index > self.strategy.date_end_order and self.strategy.is_data_finish:
-                self.strategy.refresh_data(index)
-                self.strategy.next()
-                if self.strategy.is_position:
-                    self.strategy.trade()
-        self.result =  self.calculator_traded.profit(self.strategy.get_alorder)
+        else:
+            for index in  self.__index :
+                if index > self.strategy.date_end_order and self.strategy.is_data_finish:
+                    self.strategy.refresh_data(index)
+                    self.strategy.next()
+                    if self.strategy.is_position:
+                        self.strategy.trade()
+        self.result = self.calculator_traded.finaly_result(self.strategy.get_alorder,self.__data)
+        return self.result
