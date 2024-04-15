@@ -7,7 +7,7 @@ from pandas import RangeIndex
 from pandas import to_datetime
 from pandas import DatetimeIndex
 from pandas import Timestamp
-from Calculator import UnCumulativeTradeProfit,CumulativeTradeProfit
+from Calculator import CalcutatorPofit
 from _util import is_empty,check_empty
 
 from backtesting import backtesting
@@ -46,31 +46,63 @@ class hlepper_data:
 
     def update(self,index_end_order)-> None:
         self.__update_data(index_end_order)
+@dataclass
+class TradesClose:
+
+    type_position : int = 0
+    enter_price   : float = field(default=None)
+    exit_price   : float = field(default=None)
+    enter_time    : Timestamp = field(default=None)
+    exit_time     : Timestamp = field(default=None)
+    pct : float = field(default=None)
+    deferent : float = field(default=None)
 
 @dataclass
 class OrderInfo:
     type_order: int = 0
     position : bool = False
-    date_starting: Timestamp = field(default=None)
-    price: float = field(default=None)
+    enter_price: float = field(default=None)
     tp: float = field(default=None)
     sl: float = field(default=None)
     success: int = field(default=None)
-    date_end: Timestamp = field(default=None)
+    enter_time: Timestamp = field(default=None)
+    exit_time: Timestamp = field(default=None)
 
+
+    @property
+    def exit_price(self):
+        return self.tp if self.success == 1 else self.sl
+    @property
+    def deferent(self):
+        return (self.exit_price - self.enter_price) if self.type_order ==1 else (self.enter_price - self.exit_price)
+    @property
+    def pct(self):
+        return (self.exit_price -self.enter_price)/ self.enter_price if self.type_order ==1 else -(self.exit_price -self.enter_price)/ self.enter_price
+    @property
+    def close_order(self) -> TradesClose:
+        return TradesClose(self.type_order,
+                self.enter_price
+                ,self.exit_price
+                ,self.enter_time
+                ,self.exit_time,
+                self.pct,
+                self.deferent)
 
 
 @dataclass
 class ClosedOrders:
 
-    __orders: list[OrderInfo] = field(default_factory=list)
+    __orders: list[TradesClose] = field(default_factory=list)
 
-    def add_order(self, order : OrderInfo ) -> None:
+    def append_(self, crades_close : OrderInfo ) -> None:
         """add info order closed to list orders."""
-        self.__orders.append(order)
-
-    def to_dataframe(self) -> DataFrame :
+        self.__orders.append(crades_close.close_order)
+    @property
+    def get_orders(self) -> DataFrame :
         return DataFrame([order.__dict__ for order in self.__orders])
+
+
+
 
 class Orders(hlepper_data):
     def __init__(self,date_start_order,
@@ -98,7 +130,7 @@ class Orders(hlepper_data):
     @property
     def get_alorder(self) ->DataFrame:
         """Dataframe of orders (see orders) withing empty data """
-        return self.data_orders.to_dataframe()
+        return self.data_orders.get_orders
     @property
     def is_position(self) -> bool:
         """Instance of `backtesting.strategy.Position`."""
@@ -115,16 +147,16 @@ class Orders(hlepper_data):
         self.__order =  OrderInfo(
                      type_order = type_order,
                      position = True,
-                     date_starting = self._date_start_order,
-                     price = self.limit ,
+                     enter_time = self._date_start_order,
+                     enter_price = self.limit ,
                      tp = self.tp,
                      sl = self.sl,
                      )
     def __finish_position(self,goal :int , date_end:Timestamp) -> None :
         self.__order.success  = goal
-        self.__order.date_end = date_end
+        self.__order.exit_time = date_end
         self.__order.position = False
-        self.data_orders.add_order(self.__order)
+        self.data_orders.append_(self.__order)
 
     def _open_order(self,type_order ):
         self.refresh_start_order()
@@ -293,7 +325,7 @@ class  FlashBackTesting:
                              'fill them in with `df.interpolate()` or whatever.')
         self.__ishave_signal =  "Signal" in data.columns
         self.result : DataFrame
-        self.cal_traded :CumulativeTradeProfit = self.choose_iscp(cash, ratio_entry, fees, cp)
+        self.calculator_traded = CalcutatorPofit(cash, ratio_entry, fees, cp)
 
         if self.__ishave_signal:
             data = data.loc[data.Signal != 0]
@@ -301,19 +333,13 @@ class  FlashBackTesting:
         else:
             date = data.index[1]
             self.__index = data.index
-            
+
         self.strategy = strategy(date ,data ,data_small)
 
 
 
 
-    def choose_iscp(self, cash, ratio_entry, fees, cp) -> object :
-        """Choose if you want to set the strategy with the cumulative profit or a fixed amount.
-        """
-        if cp:
-           return  CumulativeTradeProfit(cash ,ratio_entry ,fees)
-        else:
-            return UnCumulativeTradeProfit(cash ,ratio_entry ,fees)
+
 
 
     def run(self) -> None:
@@ -325,7 +351,7 @@ class  FlashBackTesting:
             while self.strategy.is_data_finish:
                 self.strategy.next()
                 self.strategy.trade()
-            self.result = self.cal_traded.profit(self.strategy.get_alorder)
+            self.result = self.calculator_traded.profit(self.strategy.get_alorder)
             return
         for index in  self.__index :
             if index > self.strategy.date_end_order and self.strategy.is_data_finish:
@@ -333,4 +359,4 @@ class  FlashBackTesting:
                 self.strategy.next()
                 if self.strategy.is_position:
                     self.strategy.trade()
-        self.result =  self.cal_traded.profit(self.strategy.get_alorder)
+        self.result =  self.calculator_traded.profit(self.strategy.get_alorder)
