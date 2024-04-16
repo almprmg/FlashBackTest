@@ -2,7 +2,7 @@
 
 # FlashBackTesting
 
-[FlashBackTesting] Backtesting and Strategy Implementation
+_FlashBackTest.py_ is a small, lightweight, extremely fast and accurate backtesting frame that uses two backtesting frameworks: a lower frame and a higher fram , that uses the latest Python structures and routines (Python 3.10+, Pandas, NumPy). It has a very small and simple API that is easy to remember and configure quickly to achieve meaningful results. The library does not really support stock picking, arbitrage trading strategies, or multi-asset portfolio rebalancing; Instead, it works with one tradable asset at a time and is best suited for optimizing entry and exit signal strategies for trades, decisions based on technical indicator values, and is a versatile interactive trading visualization and statistics tool.
 
 ## Table of Contents
 
