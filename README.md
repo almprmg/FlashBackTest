@@ -47,11 +47,11 @@ from Stratigy import Strategy
 
 2. Set up the required variables and data:
 ```python
-timeframe = "1h"
-timeflow = "5m"
+timeframe_high = "1h"
+timeframe_low = "5m"
 symbol = "AGLDUSDT"
-data_low = pd.read_csv(f'........./data/{timeflow}/{symbol}.csv', index_col=0)
-df1 = pd.read_csv(r'.....\{timeframe}/{symbol}.csv', index_col=0)
+data_low = pd.read_csv(f'........./data/{timeframe_low}/{symbol}.csv', index_col=0)
+df1 = pd.read_csv(f'.....\{timeframe_high}/{symbol}.csv', index_col=0)
 data_low.index = pd.to_datetime(data_low.index)
 
 df1["Date"] = pd.to_datetime(df1["Date"], unit='ms')
@@ -89,6 +89,27 @@ bt.run()
 5. Access the backtesting results:
 ```python
 bt.result
+
+            Start                    2022-08-26 18:00:00
+            End                      2023-08-26 17:00:00
+            Duration                   364 days 23:00:00
+            Equity Final [$]                  782.198334
+            Equity Peak [$]                  1013.011602
+            Return [%]                        -22.463471
+            Buy & Hold Return [%]              38.636364
+            Max. Drawdown [%]                 -25.033789
+            # Trades                                  71
+            Win Rate [%]                       50.704225
+            Best Trade [%]                     15.873016
+            Worst Trade [%]                   -27.142857
+            Avg. Trade [%]                     -2.049075
+            Max. Trade Duration         27 days 17:00:00
+            Avg. Trade Duration          2 days 03:00:00
+            Profit Factor                       0.624392
+            Expectancy [%]                     -1.647243
+            SQN                                -1.609426
+            _trades                            Size  ...
+            dtype: obj
 ```
 
 ## Contributing
