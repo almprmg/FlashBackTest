@@ -7,13 +7,14 @@ from pandas import RangeIndex
 from pandas import to_datetime
 from pandas import DatetimeIndex
 from pandas import Timestamp
-from Calculator import CalcutatorPofit
+from Calculator import CalcutatorProfit
 from _util import is_empty,check_empty
 
 
 
 
 class hlepper_data:
+    """ """
     def __init__(self ,
                  data: DataFrame ,
                  data_low: DataFrame ,
@@ -44,10 +45,11 @@ class hlepper_data:
         self.data = self.__data.loc[ : last_index,:]
 
     def update(self,index_end_order)-> None:
+        """next trade order."""
         self.__update_data(index_end_order)
 @dataclass
 class TradesClose:
-
+    """save info order close. """
     type_position : int = 0
     enter_price   : float = field(default=None)
     exit_price   : float = field(default=None)
@@ -58,6 +60,7 @@ class TradesClose:
 
 @dataclass
 class OrderInfo:
+    """info order for trade ,Orders.__order."""
     type_order: int = 0
     position : bool = False
     enter_price: float = field(default=None)
@@ -70,15 +73,34 @@ class OrderInfo:
 
     @property
     def exit_price(self):
+        """price to exit trade."""
         return self.tp if self.success == 1 else self.sl
     @property
+    def __short_pct(self):
+        return -(self.exit_price -self.enter_price)/ self.enter_price
+    @property
+    def __long_pct(self):
+        return (self.exit_price -self.enter_price)/ self.enter_price
+    @property
+    def __deferent_ofshort(self):
+        return self.enter_price - self.exit_price
+    @property
+    def __deferent_oflong(self):
+        return self.exit_price - self.enter_price
+    @property
     def deferent(self):
-        return (self.exit_price - self.enter_price) if self.type_order ==1 else (self.enter_price - self.exit_price)
+        """deferent between entry price to exit price."""
+        return self.__deferent_oflong if self.type_order ==1 else self.__deferent_ofshort
+
     @property
     def pct(self):
-        return (self.exit_price -self.enter_price)/ self.enter_price if self.type_order ==1 else -(self.exit_price -self.enter_price)/ self.enter_price
+        """pct change (%) from entry to exit."""
+        return self.__long_pct if self.type_order ==1 else self.__short_pct
+
+
     @property
     def close_order(self) -> TradesClose:
+        """exit order and get info trade exit order."""
         return TradesClose(self.type_order,
                 self.enter_price
                 ,self.exit_price
@@ -90,20 +112,22 @@ class OrderInfo:
 
 @dataclass
 class ClosedOrders:
-
+    """list  orders closed this win and loss"""
     __orders: list[TradesClose] = field(default_factory=list)
 
-    def append_(self, crades_close : OrderInfo ) -> None:
+    def append_(self, orders_close : OrderInfo ) -> None:
         """add info order closed to list orders."""
-        self.__orders.append(crades_close.close_order)
+        self.__orders.append(orders_close.close_order)
     @property
     def get_orders(self) -> DataFrame :
+        """list Data frame info orders trades"""
         return DataFrame([order.__dict__ for order in self.__orders])
 
 
 
 
 class Orders(hlepper_data):
+    """control orders trade."""
     def __init__(self,date_start_order,
                  data: DataFrame ,
                  data_low: DataFrame ,) -> None:
@@ -127,7 +151,7 @@ class Orders(hlepper_data):
 
 
     @property
-    def get_alorder(self) ->DataFrame:
+    def get_allorder(self) ->DataFrame:
         """Dataframe of orders (see orders) withing empty data """
         return self.data_orders.get_orders
     @property
@@ -164,6 +188,7 @@ class Orders(hlepper_data):
 
 
     def _close_order(self,goal:bool ,date_end : Timestamp) -> None :
+
         self.__finish_position(goal,date_end)
         self.refresh_end_order(date_end)
         self.update(date_end)
@@ -173,36 +198,42 @@ class Orders(hlepper_data):
 
 
 class Trade(Orders):
-    """when is order opened ,is start back taste """
+    """when is order opened ,is start back taste."""
     def trade(self) -> None:
-        """start finding result order"""
+        """start finding result order."""
         if self.is_position:
             gols ,date_end = self.date_finish_order()
             self._close_order(gols ,date_end )
-    def trade_order(self) -> tuple:
-        date_target , date_loss = self.long_order() if self.is_long else self.short_order()
-        date_tp = date_target.index[0] if check_empty(date_target) else check_empty(date_loss)
-        date_sl = date_loss.index[0] if check_empty(date_loss)  else check_empty(date_target)
-        return date_tp ,date_sl
-
     def is_win(self,date_tp,date_sl) -> bool:
+        " take profit tp order "
         return date_tp < date_sl
     def is_loss(self,date_tp,date_sl) -> bool:
+        " take stop loss sl order "
         return not self.is_win(date_tp,date_sl)
-
-    def date_finish_order(self)-> list:
-        date_tp,date_sl = self.trade_order()
-        if (is_empty(date_tp,date_sl)) :
-            return [1,date_tp] if self.is_win(date_tp,date_sl) else [0,date_sl]
-        return [None,None]
     def long_order(self) -> tuple:
+        """date tp and sl  long order."""
         date_target =  self.data_low.loc[self.data_low.High >= self.tp]
         date_loss   =   self.data_low.loc[self.data_low.Low <= self.sl]
         return date_target , date_loss
     def short_order(self) -> tuple:
+        """date tp and sl  short order."""
         date_target =  self.data_low.loc[self.data_low.Low <= self.tp]
         date_loss   =   self.data_low.loc[self.data_low.High >= self.sl]
         return date_target , date_loss
+
+    def trade_order(self) -> tuple[Timestamp,Timestamp]:
+        """exit date time order of tp and sl."""
+        date_target , date_loss = self.long_order() if self.is_long else self.short_order()
+        date_tp = date_target.index[0] if check_empty(date_target) else check_empty(date_loss)
+        date_sl = date_loss.index[0] if check_empty(date_loss)  else check_empty(date_target)
+        return date_tp ,date_sl
+    def date_finish_order(self)-> list[int,Timestamp]:
+        """date time exit order ,win or loss."""
+        date_tp,date_sl = self.trade_order()
+        if (is_empty(date_tp,date_sl)) :
+            return [1,date_tp] if self.is_win(date_tp,date_sl) else [0,date_sl]
+        return [None,None]
+
 
 
 
@@ -270,7 +301,7 @@ class Strategy(Trade,metaclass=ABCMeta):
         """
 class  FlashBackTesting:
     """"
-    This code and comment  is inspired by the backtesting library: [https://github.com/kernc/backtesting.py.git]
+    same code and comment  is inspired by the backtesting library: [https://github.com/kernc/backtesting.py.git]
     
     FlashBackTesting a particular (parameterized) strategy
     on particular data.
@@ -324,7 +355,7 @@ class  FlashBackTesting:
                              'fill them in with `df.interpolate()` or whatever.')
         self.__ishave_signal =  "Signal" in data.columns
         self.result : DataFrame
-        self.calculator_traded = CalcutatorPofit(cash, ratio_entry, fees, cp)
+        self.calculator_traded = CalcutatorProfit(cash, ratio_entry, fees, cp)
         self.__data = data.copy(deep=False)
         if self.__ishave_signal:
             data = data.loc[data.Signal != 0]
@@ -365,7 +396,6 @@ class  FlashBackTesting:
             dtype: obj
         """
         if self.__ishave_signal:
-
             while self.strategy.is_data_finish:
                 self.strategy.next()
                 self.strategy.trade()
@@ -376,5 +406,5 @@ class  FlashBackTesting:
                     self.strategy.next()
                     if self.strategy.is_position:
                         self.strategy.trade()
-        self.result = self.calculator_traded.finaly_result(self.strategy.get_alorder,self.__data)
+        self.result = self.calculator_traded.finaly_result(self.strategy.get_allorder,self.__data)
         return self.result
