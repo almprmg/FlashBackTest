@@ -15,24 +15,29 @@ class Wallet:
 
     @property
     def amount(self):
+        """amount cash a open order."""
         retail = 100 / self.ratio_entry
         return self.cash /  retail
 
 
 
 
-class CalcutatorPofit():
+class CalcutatorProfit():
+    """Calculator profit trade of ech order."""
     def __init__(self, cash, ratio_entry, rate_fees,cp) -> None:
         self.wallet = Wallet( cash, ratio_entry)
         self.rate_fees : float = rate_fees
         self.__cp = cp
     def fees(self,amount:int | pd.Series) -> int | pd.Series:
+        """fess trade open,close."""
         return self.rate_fees * amount
 
     def quantity(self,enter_price :float | pd.Series) -> float | pd.Series:
+        """Size symbol of order."""
         return self.wallet.amount / enter_price
 
     def pnl(self,pct_cheng: float | pd.Series) -> float | pd.Series :
+        """Return PnL cash."""
         return self.wallet.amount * pct_cheng
 
     def fixed_result(self,result:pd.DataFrame):
@@ -43,6 +48,9 @@ class CalcutatorPofit():
         result["Quantity"] /=1000
         return result
     def unCumulative(self,result:pd.DataFrame) -> pd.DataFrame:
+        """There is no need to override 'price_end' it has the same
+            signature as the implementation in UnCalculatorProfit.
+        """
         result["FeesOpen"] = self.fees(self.wallet.amount)
         result["Quantity"] = self.quantity( result.enter_price)
         result['PnL'] = self.pnl(result['pct'])
