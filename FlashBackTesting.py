@@ -7,7 +7,7 @@ from pandas import RangeIndex
 from pandas import to_datetime
 from pandas import DatetimeIndex
 from pandas import Timestamp
-from Calculator import CalcutatorPofit
+from Calculator import CalcutatorProfit
 from _util import is_empty,check_empty
 
 
@@ -324,7 +324,7 @@ class  FlashBackTesting:
                              'fill them in with `df.interpolate()` or whatever.')
         self.__ishave_signal =  "Signal" in data.columns
         self.result : DataFrame
-        self.calculator_traded = CalcutatorPofit(cash, ratio_entry, fees, cp)
+        self.calculator_traded = CalcutatorProfit(cash, ratio_entry, fees, cp)
         self.__data = data.copy(deep=False)
         if self.__ishave_signal:
             data = data.loc[data.Signal != 0]
