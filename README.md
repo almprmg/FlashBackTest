@@ -67,17 +67,17 @@ class myClass(Strategy):
     def next(self) -> None:
         super().next()
         if self.data.Signal[-1] == 1:
-            self.limit = self.data.highest_top[-1]
+            limit = self.data.highest_top[-1]
             highest_top = self.data.highest_bot[-1]
-            self.sl = highest_top - ((self.limit - highest_top) * 3)
-            self.tp = highest_top + ((self.limit - highest_top) * 5)
+            sl = highest_top - ((self.limit - highest_top) * 3)
+            tp = highest_top + ((self.limit - highest_top) * 5)
             self.buy(limit=self.limit, tp=self.tp, sl=self.sl)
-        elif -1 != None and self.data.Signal[-1] == 2:
-            self.limit = self.data.highest_bot[-1]
+        elif self.data.Signal[-1] == 2:
+            limit = self.data.highest_bot[-1]
             highest_top = self.data.highest_top[-1]
-            self.sl = highest_top - ((self.limit - highest_top) * 3)
-            self.tp = highest_top + ((self.limit - highest_top) * 5)
-            self.sell(limit=self.limit, tp=self.tp, sl=self.sl)
+            sl = highest_top - ((highest_top - limit) * 3)
+            tp = highest_top + ((highest_top - limit) * 5)
+            self.sell(limit=limit, tp=tp, sl=sl)
 ```
 
 4. Create an instance of the `FlashBackTesting` class and run the backtest:
