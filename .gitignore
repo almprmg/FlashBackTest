@@ -1,6 +1,6 @@
 __pycache__/*
 .scannerwork/
 gitdata.py
-*.ipynb
+/*.ipynb
 main_tast.py
 flashBackTesring/*
