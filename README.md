@@ -128,6 +128,8 @@ Contributions to [FlashBackTesting] are welcome! To contribute, please follow th
 3. Supports any financial instrument with candlestick data
 3. Detailed results
 4. Accuracy in results
+5. uses tow time frame
+
 ## License
 [(AGPL-3.0 License](LICENSE)
 
@@ -135,7 +137,7 @@ Contributions to [FlashBackTesting] are welcome! To contribute, please follow th
 
 For any questions or feedback, please contact:
 
-- [Hareth AL-Maqtari]: [uuyyhh9009@gmail.com]
+- [Hareth AL-Maqtari]: []
 
 
 ---
