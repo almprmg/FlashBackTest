@@ -41,8 +41,8 @@ To use [FlashBackTesting], follow these guidelines:
 1. Import the necessary libraries:
 ```python
 import pandas as pd
-from BackTest_bisc import FlashBackTesting
-from Stratigy import Strategy
+from flashBackTesting import FlashBackTesting
+from FlashBackTesting import Strategy
 ```
 
 2. Set up the required variables and data:
