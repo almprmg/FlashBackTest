@@ -34,11 +34,7 @@ class HelperData:
     def update(self,index) :
         self.data = self.__data.loc[ :index,:]
         self.update_data_low(index)
-    @property
-    def after_last_candel(self):
-        if len(self.data)+1 <len(self.__data):
-            return self.__data.iloc[len(self.data)+1].name
-        return self.__data.iloc[len(self.data)-1].name
+
     @property
     def last_date(self) -> None:
         """time start last order opened, for update data from it."""
