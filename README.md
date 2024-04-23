@@ -42,7 +42,7 @@ To use [FlashBackTesting], follow these guidelines:
 ```python
 import pandas as pd
 from flashBackTesting import FlashBackTesting
-from FlashBackTesting import Strategy
+from flashBackTesting import Strategy
 ```
 
 2. Set up the required variables and data:
