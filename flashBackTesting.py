@@ -119,14 +119,15 @@ class OrderTrader:
 
 class Trade:
     """when is order opened ,is start back taste """
-    def __init__(self,helper_data,max_order) -> None:
+    def __init__(self,helper_data,max_order,all_signal) -> None:
         self.helper_data :HelperData = helper_data
         self.order_trade : list[OrderTrader] = []
         self.trades_closed : list[TradesClose] = []
         self.__max_orders: int = max_order
+        self.all_signal = all_signal
     def new_order(self,type_position,limit,sl,tp) -> None:
         """appending order"""
-        if len( self.order_trade) <= self.__max_orders:
+        if len( self.order_trade) <= self.__max_orders or self.all_signal:
             order = Order(
                     type_position = type_position,
                     enter_price= limit ,
@@ -290,6 +291,7 @@ class  FlashBackTesting:
                  cash: int = 1000 ,
                  ratio_entry:int = 1000 ,
                  fees: float = 0.001 ,
+                 all_signal = False,
                  cp: bool = False ) -> None:
 
         if not (isinstance(strategy, type) and issubclass(strategy, Strategy)):
@@ -333,8 +335,8 @@ class  FlashBackTesting:
         helper_data = HelperData(data=data.copy(deep= False),
                                  data_low=data_small.copy(deep= False))
         self._helper_data = helper_data
-        self._trade =Trade(helper_data, max_order)
-        self.strategy = strategy(self._trade,helper_data,)
+        self._trade =Trade(helper_data, max_order,all_signal)
+        self._strategy = strategy(self._trade,helper_data,)
         self.calculator_traded = CalculatorProfit(cash, ratio_entry, fees, cp,data)
         self.result : DataFrame
 
@@ -372,10 +374,10 @@ class  FlashBackTesting:
         """
 
         for index in self.__index:
-            self.strategy.next()
+            self._strategy.next()
             self._helper_data.update(index)
-            if self.strategy.position:
-                self.strategy.trade.start_trading()
+            if self._strategy.position:
+                self._strategy.trade.start_trading()
 
-        self.result = self.calculator_traded.result(self.strategy.get_trade)
+        self.result = self.calculator_traded.result(self._strategy.get_trade)
         return self.result
