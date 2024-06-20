@@ -127,7 +127,7 @@ class Trade:
         self.all_signal = all_signal
     def new_order(self,type_position,limit,sl,tp) -> None:
         """appending order"""
-        if len( self.order_trade) <= self.__max_orders or self.all_signal:
+        if len( self.order_trade) <= self.__max_orders and True if len(self.order_trade) == 0  else  self.all_signal:
             order = Order(
                     type_position = type_position,
                     enter_price= limit ,
